@@ -54,5 +54,6 @@ function parseTranscript(transcriptText) {
   }
 
 const parsedCourses = parseTranscript(text);
+
 console.log(JSON.stringify(parsedCourses, null, 2));
   
