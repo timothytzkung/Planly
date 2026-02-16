@@ -8,6 +8,6 @@
     "front-install": "cd frontend && npm install",
     "back-install": "cd backend && npm install",
     "setup": "run-s front-install back-install",
-    "all": "run-p frontend backend"
+    "start": "run-p frontend backend"
   }
 }
