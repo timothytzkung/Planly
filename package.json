@@ -5,6 +5,9 @@
   "scripts": {
     "frontend": "cd frontend && npm run dev",
     "backend": "cd backend/server && node server.js",
-    "all": "run-p frontend backend"
+    "front-install": "cd frontend && npm install",
+    "back-install": "cd backend && npm install",
+    "setup": "run-s front-install back-install",
+    "start": "run-p frontend backend"
   }
 }
