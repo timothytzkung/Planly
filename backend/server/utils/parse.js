@@ -1,5 +1,3 @@
-import { PDFParse } from 'pdf-parse';
-
 
 export const parseTranscript = (transcriptText) => {
   const lines = transcriptText.split("\n");

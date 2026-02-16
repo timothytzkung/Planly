@@ -53,7 +53,6 @@ app.post("/api/parse", upload.single("pdf"), async(req, res) => {
   const fin = JSON.stringify(courses, null, 2)
   console.log(fin);
   res.json({transcript: fin});
-  // res.json({courses})
 })
 
 
