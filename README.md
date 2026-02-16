@@ -3,7 +3,8 @@ SFU Planly is a degree planning web app for SFU students. Students can upload th
 
 Instructions:
 1. Navigate to the root folder (not inside backend or frontend; outside)
-2. Run `npm run setup` to download dependencies
+2. run `npm install` to download root dependencies
+2. Run `npm run setup` to download project dependencies
 3. Run `npm run all` to start development
 
 `npm run all` will run frontend and backend in parallel--don't need to change dirs.
