@@ -4,7 +4,7 @@ const require = createRequire(import.meta.url);
 
 
 import { PDFParse } from 'pdf-parse';
-import { parseTranscript } from "./utils/parse.js";
+import { parseTranscript, parseTranscriptByTerm } from "./utils/parse.js";
 const express = require('express');
 const multer = require("multer");
 const cors = require('cors'); // Import the CORS package
@@ -47,7 +47,8 @@ app.post("/api/parse", upload.single("pdf"), async(req, res) => {
 
   // Get text
   const text = result.text;
-  const courses = parseTranscript(text);
+  console.log(text)
+  const courses = parseTranscriptByTerm(text);
   
   // Stringify results
   const fin = JSON.stringify(courses, null, 2)
