@@ -91,7 +91,7 @@ export const parseTranscriptByTerm = (text) => {
       "faculty": faculty,
       "course-number": courseNumber,
       "credits": credits,
-      "grade": grade,
+      // "grade": grade,
       "class-average": classAverage,
       "class-size": classSize,
       "status": status
