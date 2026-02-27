@@ -7,7 +7,7 @@
     "backend": "cd backend/server && node server.js",
     "front-install": "cd frontend && npm install",
     "back-install": "cd backend && npm install",
-    "setup": "run-p front-install && back-install",
-    "all": "run-p frontend backend"
+    "setup": "run-s front-install back-install",
+    "start": "run-p frontend backend"
   }
 }
