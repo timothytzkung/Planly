@@ -4,10 +4,14 @@ const require = createRequire(import.meta.url);
 
 
 import { PDFParse } from 'pdf-parse';
-import { parseTranscriptByTerm } from "./utils/parse.js";
+
 const express = require('express');
 const multer = require("multer");
 const cors = require("cors"); // Import the CORS package
+
+// In-house functions
+import { parseTranscriptByTerm } from "./utils/parse.js";
+import { transcriptAnalyzer } from "./controllers/transcriptAnalyzer.js";
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -100,6 +104,21 @@ app.post("/api/course-outline", async(req, res) => {
   // No parsing needed because SFU api parsed it already
   const data = await response.json();
   res.json({ courses: data });
+})
+
+
+app.post("/api/check-requirements", async(req, res) => {
+  if (!req.body) return res.status(400).json({error: "No body attached"});
+
+  // Destruct
+  const { transcriptData, degreeType } = req.body;
+  const result = transcriptAnalyzer(transcriptData);
+  
+  // Check
+  console.log(result);
+  const fin = JSON.stringify(result, null, 2);
+
+  res.json({ result: fin });
 })
 
 // Listen
