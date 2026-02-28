@@ -52,6 +52,7 @@ export const SFUCoursesPage = () => {
     setCourseInfo(data);
   }
 
+  // gets specific course outline ==> returns info about course, instructor, schedule, reqs, etc.
   const getCourseOutline = async(_year, _term, _department, _courseNumber, _courseSection) => {
     // Fetch
     const response = await fetch(`http://localhost:${BACK_PORT}/api/course-outline`, {
