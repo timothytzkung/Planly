@@ -328,74 +328,8 @@ const check400Level = (completed, inProgress) => {
     };
 };
 
-// Ratchet ass way to check for breadth 💀
-/* 
-1. GET: Looks up course to find sections
-2. Grab first existing course from sections
-3. GET: Look up courseSection to get outline, to get breadth
-
-*/
-
-const getSections = async(c) => {
-    console.log("Looking up section number...")
-    const term = c.term.split(" "); // eg) returns ["2021", "Fall"]
-    const url = `http://www.sfu.ca/bin/wcm/course-sections?${term[0]}/${term[1]}/${c.faculty}/${c.courseNumber}`
-
-    console.log(url)
-    const response = await fetch(url, {
-        method: "GET"
-    })
-    const data = await response.json();
-    return JSON.stringify(data[0].text);
-}
-
-const getBreadth = async(c, sectionID) => {
-    console.log("Section number: " + sectionID + " found! Looking up outline...")
-    const term = c.term.split(" "); // eg) returns ["2021", "Fall"]
-    const url = `http://www.sfu.ca/bin/wcm/course-sections?${term[0]}/${term[1]}/${c.faculty}/${c.courseNumber}/${sectionID}`;
-    const response = await fetch(url, {
-        method: "GET"
-    })
-    const data = await response.json()
-    return data;
-}
-
-const checkBreadth = async(completed, breadth) => {
-    let promises = [];
-    for (let i = 0; i < completed.length; i++) {
-        promises.push(await getSections(c));
-    }
 
 
-    let breadthCheck;
-    const p = completed.map(async(c) => {
-        console.log("Check!");
-        console.log(c);
-        // returns sections
-        const sectionID = await getSections(c);
-        breadthCheck = await getBreadth(c, sectionID);
-    })
-    
-    // const response = await fetch(url, {
-    //   method: "GET"
-    // })
-    // // No parsing needed because SFU api parsed it already
-    // const data = await response.json();
-}
-
-const checkWQB2 = (completed, inProgress) => {
-    const wCourses = completed.filter(c => 
-        c.courseCode.includes('W')
-    );
-    const upperDivW = completed.includes("IAT 309W");
-
-    
-}
-
-
-/**
- * Check WQB Requirements
- */
 /**
  * Check WQB Requirements
  */
