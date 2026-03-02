@@ -34,21 +34,26 @@ app.get("/api/hello", (req, res) => {
 app.post("/api/parse", upload.single("pdf"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file seen" });
 
-  // Convert to bytes
-  const bytes = new Uint8Array(req.file.buffer); // Uint8Array
+  try {
+    // Convert to bytes
+    const bytes = new Uint8Array(req.file.buffer); // Uint8Array
 
-  // Parse
-  const parser = new PDFParse({ data: bytes });
-  const result = await parser.getText();
-  await parser.destroy();
+    // Parse
+    const parser = new PDFParse({ data: bytes });
+    const result = await parser.getText();
+    await parser.destroy();
 
-  // Get text
-  const text = result.text;
-  const courses = parseTranscriptByTerm(text);
-  
-  // Stringify results
-  const fin = JSON.stringify(courses, null, 2);
-  res.json({ transcript: fin });
+    // Get text
+    const text = result.text;
+    const courses = parseTranscriptByTerm(text);
+
+    // Stringify results
+    const fin = JSON.stringify(courses, null, 2);
+    res.json({ transcript: fin });
+  } catch (err) {
+    console.error("Error parsing PDF", err);
+    res.status(500).json({ error: "Failed to parse PDF, it may be corrupted or unsupported." });
+  }
 });
 
 // SFU API courses in dept. route (req includes => {year, term, department })
