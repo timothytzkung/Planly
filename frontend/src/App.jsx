@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { PdfUploadPage } from "./test/PdfUploadPage";
+import { SFUCoursesPage } from "./test/SFUCoursesPage";
 
 function App() {
   const [message, setMessage] = useState("");
@@ -18,13 +19,14 @@ function App() {
   useEffect(() => {
     // Note: We use the FULL URL. There is no proxy to infer the host.
     getHello();
-  }, [pdfFile]);
+  });
 
   return (
     <div className="App">
       <h1>Planly</h1>
       <p>Server says: {message}</p>
       <PdfUploadPage />
+      <SFUCoursesPage />
     </div>
   );
 }

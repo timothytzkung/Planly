@@ -1,13 +1,29 @@
 // PdfUploadPage.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export const PdfUploadPage = () => {
   const [file, setFile] = useState(null);
+  const [fileIsUploaded, setFileIsUploaded] = useState(false);
+  const [reqSummary, setReqSummary] = useState(null);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
   const [transcript, setTranscript] = useState(null);
+  const [credits, setCredits] = useState(0);
 
   const BACK_PORT = 5050;
+
+  const countTotalCredits = (data) => {
+    let totalCredits = 0;
+  
+    for (const term in data) {
+      const courses = data[term];
+  
+      for (const course of courses) {
+        totalCredits += course.credits;
+      }
+    }
+    return totalCredits;
+  }
 
   async function handleUpload(e) {
     e.preventDefault();
@@ -27,19 +43,62 @@ export const PdfUploadPage = () => {
 
     // Loading
     setLoading(true)
+
+    // Fetch
     const response = await fetch(`http://localhost:${BACK_PORT}/api/parse`, {
       method: "POST",
       body: formData,
-    })
+    }).catch((error) => setErr(error));
 
     const data = await response.json();
     const parsed = JSON.parse(data.transcript)
 
+    // Set transcript data
     setTranscript(parsed);
+    setFileIsUploaded(true);
 
     // End load
     setLoading(false)
   }
+
+  const checkRequirements = async(_degreeType) => {
+    console.log("calling backend for checkreqs")
+    console.log(transcript);
+    const response = await fetch(`http://localhost:${BACK_PORT}/api/check-requirements`, {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ 
+        transcriptData: transcript,
+        degreeType: _degreeType
+      })
+    }).catch((error) => setErr(error));
+
+    const data = await response.json();
+    const parsed = JSON.parse(data.result)
+    return parsed;
+  }
+
+  // Trigger on finished pdf upload
+  useEffect(() => {
+    const count = countTotalCredits(transcript);
+    setCredits(count);
+
+    const handleRequirements = async() => {
+      const result = await checkRequirements("BSc");
+      console.log(result);
+      setReqSummary(result);
+    }
+    if (fileIsUploaded) {
+      handleRequirements();
+      console.log(reqSummary)
+      setFileIsUploaded(false); // debounce
+    }
+
+  }, [transcript, loading, fileIsUploaded])
+
 
   return (
     <div style={{ maxWidth: 720, margin: "40px auto", padding: 16 }}>
@@ -62,6 +121,14 @@ export const PdfUploadPage = () => {
           <b>Error:</b> {err}
         </div>
       )}
+      <h2>Summary</h2>
+      {reqSummary && (
+        <pre style={{ marginTop: 16, padding: 12, overflowX: "auto" }}>
+          {JSON.stringify(reqSummary, null, 2)}
+        </pre>
+      )}
+      
+      <h2>Progress: {credits}/120</h2>
 
       {transcript && (
         <pre style={{ marginTop: 16, padding: 12, overflowX: "auto" }}>
