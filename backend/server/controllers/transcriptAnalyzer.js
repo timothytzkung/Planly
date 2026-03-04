@@ -5,15 +5,22 @@ TODO;
 
 Change breadth requirements to fetch from SFU API
 */
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
 
-export const transcriptAnalyzer = (transcriptData) => {
+// Course Model
+const WQBCourse = require("../models/wqbCourse")
+
+
+// Main runner function
+export const transcriptAnalyzer = async(transcriptData) => {
     const courses = parseTranscriptData(transcriptData);
 
     // Calculate GPAs
     const gpaResults = calculateGPAs(courses);
 
     // Check requirements
-    const requirementChecks = checkAllRequirements(courses);
+    const requirementChecks = await checkAllRequirements(courses);
 
     // Generate comprehensive report
     return {
@@ -149,7 +156,7 @@ const calculateGradeDistribution = (courses) => {
 /**
  * Check all requirements against transcript
  */
-const checkAllRequirements = (courses) => {
+const checkAllRequirements = async(courses) => {
     const completedCourses = courses.filter(c => c.status === 'completed' || c.status === 'pass');
     const inProgressCourses = courses.filter(c => c.status === 'in-progress');
 
@@ -159,7 +166,7 @@ const checkAllRequirements = (courses) => {
         upperDivisionRequired: checkUpperDivRequired(completedCourses, inProgressCourses),
         upperDivisionScience: checkUpperDivScience(completedCourses, inProgressCourses),
         fourHundredLevel: check400Level(completedCourses, inProgressCourses),
-        wqb: checkWQB(completedCourses, inProgressCourses),
+        wqb: await checkWQB(completedCourses, inProgressCourses),
         overall: checkOverallProgress(completedCourses, inProgressCourses)
     };
 };
@@ -304,7 +311,7 @@ const check400Level = (completed, inProgress) => {
         !c.courseCode.includes('487')
     );
 
-    const completed400 = completed.filter(c =>
+    const completed400 = allCourses.filter(c =>
         c.faculty === 'IAT' &&
         c.courseLevel === 400 &&
         c.credits >= 3 &&
@@ -329,154 +336,200 @@ const check400Level = (completed, inProgress) => {
 };
 
 
+// Check if course exists
+const getDesignations = async (courseNumber) => {
+    const normalized = courseNumber.trim().toUpperCase();
+
+    const doc = await WQBCourse.findOne(
+        { courseNumber: normalized },
+        { designations: 1, _id: 0 }
+    ).lean();
+
+    return doc?.designations ?? [];
+}
 
 /**
  * Check WQB Requirements
  */
-const checkWQB = (completed, inProgress) => {
-    // Writing courses - keep full course objects
-    checkBreadth((completed.filter(c => !c.courseCode.includes("IAT"))));
 
-    const wCourses = completed.filter(c => 
-      c.courseCode.includes('W') || 
-      ['IAT 103W', 'IAT 206W', 'IAT 309W', 'EDUC 100W'].includes(c.courseCode)
-    );
-    
+/*
+WQB Helpers
+*/
+const norm = (code) => {
+    return String(code ?? "").trim().toUpperCase().replace(/\s+/g, " ");
+}
+
+// Map for new set of completed courses
+async function getWqbMapForCompleted(completed) {
+    const courseNumbers = [...new Set(completed.map(c => norm(c.courseCode)))];
+
+    const docs = await WQBCourse.find(
+        { courseNumber: { $in: courseNumbers } },
+        { courseNumber: 1, designations: 1, _id: 0 }
+    ).lean();
+
+    const map = new Map();
+    for (const d of docs) map.set(d.courseNumber, d.designations || []);
+    return map;
+}
+
+// Check if includes tags
+const hasTag = (tags, t) => {
+    return (tags || []).includes(t);
+  }
+
+
+const checkWQB = async (completed, inProgress) => {
+    // Include completed + inprogress
+    const allCourses = [...completed, ...inProgress];
+
+    // Writing courses - keep full course objects
+    const wqbMap = await getWqbMapForCompleted(allCourses)
+
+    const wCourses = allCourses.filter(c => {
+        const tags = wqbMap.get(norm(c.courseCode));
+        return hasTag(tags, "W") && (c.courseCode.includes("IAT")); // Hard code in IAT writing courses
+    });
     // 309W check
-    const upperDivW = wCourses.some(c => 
-      c.faculty === 'IAT' && c.courseLevel >= 300
+    const upperDivW = wCourses.some(c =>
+        c.faculty === 'IAT' && c.courseLevel >= 300
     );
-    
-    // Quantitative courses - keep full course objects
-    const qCourses = completed.filter(c =>
-      ['MACM 101', 'CMPT 120', 'CMPT 125', 'MATH 232'].includes(c.courseCode)
-    );
-    
-    // Breadth courses (outside IAT) - keep full course objects
-    const breadthCourses = completed.filter(c => c.faculty !== 'IAT');
-    
-    const bSci = completed.filter(c => 
-      ['BISC', 'EASC', 'GEOG', 'PHYS', 'REM'].includes(c.faculty) &&
-      c.courseCode !== 'GEOG 312' // Upper div doesn't count for B-Sci requirement
-    );
-    
-    const bSoc = completed.filter(c => 
-      ['EDUC', 'PSYC', 'SA', 'GEOG'].includes(c.faculty) &&
-      ['EDUC 220', 'GEOG 104'].includes(c.courseCode)
-    );
-    
-    const bHum = completed.filter(c => 
-      ['ARCH', 'HIST', 'ENGL', 'EDUC'].includes(c.faculty) &&
-      ['EDUC 230'].includes(c.courseCode)
-    );
-    
+
+    // Filtered out IAT
+    const _courses = allCourses.filter(c => !c.courseCode.includes("IAT"))
+
+    // Quant req
+    const qCourses = _courses.filter(c => {
+        const tags = wqbMap.get(norm(c.courseCode));
+        return hasTag(tags, "Q");
+    });
+
+    // Breadth requirements
+    const bSci = _courses.filter(c => {
+        const tags = wqbMap.get(norm(c.courseCode));
+        return hasTag(tags, "B-SCI");
+    });
+
+    const bSoc = _courses.filter(c => {
+        const tags = wqbMap.get(norm(c.courseCode));
+        return hasTag(tags, "B-SOC");
+    });
+
+    const bHum = _courses.filter(c => {
+        const tags = wqbMap.get(norm(c.courseCode));
+        return hasTag(tags, "B-HUM");
+    });
+
+    const breadthCourses = [...bSci, ...bSoc, ...bHum, ...qCourses, ...wCourses];
+    console.log(breadthCourses)
+
     return {
-      writing: {
-        required: 6,
-        completed: wCourses.reduce((sum, c) => sum + c.credits, 0),
-        isMet: wCourses.length >= 2 && upperDivW,
-        hasUpperDivInMajor: upperDivW,
-        courses: wCourses.map(c => ({
-          code: c.courseCode,
-          name: c.courseName,
-          credits: c.credits,
-          grade: c.grade,
-          term: c.term,
-          // Extract year from term string (e.g., "2021 Summer" -> 2021)
-          year: parseInt(c.term.split(' ')[0]),
-          // Extract season from term string (e.g., "2021 Summer" -> "Summer")
-          season: c.term.split(' ')[1],
-          level: c.courseLevel
-        }))
-      },
-      quantitative: {
-        required: 6,
-        completed: qCourses.reduce((sum, c) => sum + c.credits, 0),
-        isMet: qCourses.reduce((sum, c) => sum + c.credits, 0) >= 6,
-        courses: qCourses.map(c => ({
-          code: c.courseCode,
-          name: c.courseName,
-          credits: c.credits,
-          grade: c.grade,
-          term: c.term,
-          year: parseInt(c.term.split(' ')[0]),
-          season: c.term.split(' ')[1],
-          level: c.courseLevel
-        }))
-      },
-      breadth: {
-        science: {
-          required: 6,
-          completed: bSci.reduce((sum, c) => sum + c.credits, 0),
-          isMet: bSci.reduce((sum, c) => sum + c.credits, 0) >= 6,
-          courses: bSci.map(c => ({
-            code: c.courseCode,
-            name: c.courseName,
-            credits: c.credits,
-            grade: c.grade,
-            term: c.term,
-            year: parseInt(c.term.split(' ')[0]),
-            season: c.term.split(' ')[1],
-            level: c.courseLevel
-          }))
-        },
-        socialScience: {
-          required: 6,
-          completed: bSoc.reduce((sum, c) => sum + c.credits, 0),
-          isMet: bSoc.reduce((sum, c) => sum + c.credits, 0) >= 6,
-          courses: bSoc.map(c => ({
-            code: c.courseCode,
-            name: c.courseName,
-            credits: c.credits,
-            grade: c.grade,
-            term: c.term,
-            year: parseInt(c.term.split(' ')[0]),
-            season: c.term.split(' ')[1],
-            level: c.courseLevel
-          }))
-        },
-        humanities: {
-          required: 6,
-          completed: bHum.reduce((sum, c) => sum + c.credits, 0),
-          isMet: bHum.reduce((sum, c) => sum + c.credits, 0) >= 6,
-          courses: bHum.map(c => ({
-            code: c.courseCode,
-            name: c.courseName,
-            credits: c.credits,
-            grade: c.grade,
-            term: c.term,
-            year: parseInt(c.term.split(' ')[0]),
-            season: c.term.split(' ')[1],
-            level: c.courseLevel
-          }))
-        },
-        additional: {
-          required: 6,
-          completed: breadthCourses.reduce((sum, c) => sum + c.credits, 0) - 
-                     bSci.reduce((sum, c) => sum + c.credits, 0) -
-                     bSoc.reduce((sum, c) => sum + c.credits, 0) -
-                     bHum.reduce((sum, c) => sum + c.credits, 0),
-          isMet: true,
-          courses: breadthCourses
-            .filter(c => 
-              !bSci.includes(c) && 
-              !bSoc.includes(c) && 
-              !bHum.includes(c)
-            )
-            .map(c => ({
-              code: c.courseCode,
-              name: c.courseName,
-              credits: c.credits,
-              grade: c.grade,
-              term: c.term,
-              year: parseInt(c.term.split(' ')[0]),
-              season: c.term.split(' ')[1],
-              level: c.courseLevel
+        writing: {
+            required: 6,
+            completed: wCourses.reduce((sum, c) => sum + c.credits, 0),
+            isMet: wCourses.length >= 2 && upperDivW,
+            hasUpperDivInMajor: upperDivW,
+            courses: wCourses.map(c => ({
+                code: c.courseCode,
+                name: c.courseName,
+                credits: c.credits,
+                grade: c.grade,
+                term: c.term,
+                // Extract year from term string (e.g., "2021 Summer" -> 2021)
+                year: parseInt(c.term.split(' ')[0]),
+                // Extract season from term string (e.g., "2021 Summer" -> "Summer")
+                season: c.term.split(' ')[1],
+                level: c.courseLevel
             }))
+        },
+        quantitative: {
+            required: 6,
+            completed: qCourses.reduce((sum, c) => sum + c.credits, 0),
+            isMet: qCourses.reduce((sum, c) => sum + c.credits, 0) >= 6,
+            courses: qCourses.map(c => ({
+                code: c.courseCode,
+                name: c.courseName,
+                credits: c.credits,
+                grade: c.grade,
+                term: c.term,
+                year: parseInt(c.term.split(' ')[0]),
+                season: c.term.split(' ')[1],
+                level: c.courseLevel
+            }))
+        },
+        breadth: {
+            science: {
+                required: 6,
+                completed: bSci.reduce((sum, c) => sum + c.credits, 0),
+                isMet: bSci.reduce((sum, c) => sum + c.credits, 0) >= 6,
+                courses: bSci.map(c => ({
+                    code: c.courseCode,
+                    name: c.courseName,
+                    credits: c.credits,
+                    grade: c.grade,
+                    term: c.term,
+                    year: parseInt(c.term.split(' ')[0]),
+                    season: c.term.split(' ')[1],
+                    level: c.courseLevel
+                }))
+            },
+            socialScience: {
+                required: 6,
+                completed: bSoc.reduce((sum, c) => sum + c.credits, 0),
+                isMet: bSoc.reduce((sum, c) => sum + c.credits, 0) >= 6,
+                courses: bSoc.map(c => ({
+                    code: c.courseCode,
+                    name: c.courseName,
+                    credits: c.credits,
+                    grade: c.grade,
+                    term: c.term,
+                    year: parseInt(c.term.split(' ')[0]),
+                    season: c.term.split(' ')[1],
+                    level: c.courseLevel
+                }))
+            },
+            humanities: {
+                required: 6,
+                completed: bHum.reduce((sum, c) => sum + c.credits, 0),
+                isMet: bHum.reduce((sum, c) => sum + c.credits, 0) >= 6,
+                courses: bHum.map(c => ({
+                    code: c.courseCode,
+                    name: c.courseName,
+                    credits: c.credits,
+                    grade: c.grade,
+                    term: c.term,
+                    year: parseInt(c.term.split(' ')[0]),
+                    season: c.term.split(' ')[1],
+                    level: c.courseLevel
+                }))
+            },
+            additional: {
+                required: 6,
+                completed: breadthCourses.reduce((sum, c) => sum + c.credits, 0) -
+                    bSci.reduce((sum, c) => sum + c.credits, 0) -
+                    bSoc.reduce((sum, c) => sum + c.credits, 0) -
+                    bHum.reduce((sum, c) => sum + c.credits, 0),
+                isMet: true,
+                courses: breadthCourses
+                    .filter(c =>
+                        !bSci.includes(c) &&
+                        !bSoc.includes(c) &&
+                        !bHum.includes(c)
+                    )
+                    .map(c => ({
+                        code: c.courseCode,
+                        name: c.courseName,
+                        credits: c.credits,
+                        grade: c.grade,
+                        term: c.term,
+                        year: parseInt(c.term.split(' ')[0]),
+                        season: c.term.split(' ')[1],
+                        level: c.courseLevel
+                    }))
+            }
         }
-      }
     };
-  };
+};
 
 /**
  * Check Overall Progress
@@ -626,24 +679,6 @@ const generateRecommendations = (requirements, courses) => {
             category: 'Electives',
             message: `Need ${requirements.lowerDivisionElectives.missing} more lower division elective(s)`,
             suggestion: 'Choose from: IAT 222, IAT 233, IAT 238, IAT 267'
-        });
-    }
-
-    // Check IAT 309W before 400-level
-    if (!requirements.upperDivisionRequired.isMet && requirements.fourHundredLevel.completed > 0) {
-        recommendations.push({
-            priority: 'critical',
-            category: 'Prerequisite Violation',
-            message: 'IAT 309W must be completed before taking 400-level courses'
-        });
-    }
-
-    if (!requirements.upperDivisionRequired.isMet) {
-        recommendations.push({
-            priority: 'high',
-            category: 'Required Course',
-            message: 'Take IAT 309W (Writing Methods for Research)',
-            note: 'Required before 400-level courses'
         });
     }
 

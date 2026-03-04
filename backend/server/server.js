@@ -22,7 +22,8 @@ const upload = multer({ storage: multer.memoryStorage() });
 // Mongo Bongo
 const PORT = 5050;
 const FRONT_PORT = 5173;
-const mongoUri = process.env.MONGO_URI;
+const mongoUri = process.env.MONGO_WQB_URI;
+// const mongo_WQB_URI = process.env.mongo_WQB_URI;
 
 // Middleware to parse JSON
 app.use(express.json());
@@ -149,7 +150,7 @@ app.post("/api/check-requirements", async (req, res) => {
 
   // Destruct
   const { transcriptData, degreeType } = req.body;
-  const result = transcriptAnalyzer(transcriptData);
+  const result = await transcriptAnalyzer(transcriptData);
 
   // Check
   console.log(result);
