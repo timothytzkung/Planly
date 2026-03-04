@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 
 export const PdfUploadPage = () => {
   const [file, setFile] = useState(null);
+  const [fileIsUploaded, setFileIsUploaded] = useState(false);
+  const [reqSummary, setReqSummary] = useState(null);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
   const [transcript, setTranscript] = useState(null);
@@ -53,16 +55,49 @@ export const PdfUploadPage = () => {
 
     // Set transcript data
     setTranscript(parsed);
+    setFileIsUploaded(true);
 
     // End load
     setLoading(false)
+  }
+
+  const checkRequirements = async(_degreeType) => {
+    console.log("calling backend for checkreqs")
+    console.log(transcript);
+    const response = await fetch(`http://localhost:${BACK_PORT}/api/check-requirements`, {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ 
+        transcriptData: transcript,
+        degreeType: _degreeType
+      })
+    }).catch((error) => setErr(error));
+
+    const data = await response.json();
+    const parsed = JSON.parse(data.result)
+    return parsed;
   }
 
   // Trigger on finished pdf upload
   useEffect(() => {
     const count = countTotalCredits(transcript);
     setCredits(count);
-  }, [transcript, loading])
+
+    const handleRequirements = async() => {
+      const result = await checkRequirements("BSc");
+      console.log(result);
+      setReqSummary(result);
+    }
+    if (fileIsUploaded) {
+      handleRequirements();
+      console.log(reqSummary)
+      setFileIsUploaded(false); // debounce
+    }
+
+  }, [transcript, loading, fileIsUploaded])
 
 
   return (
@@ -85,6 +120,12 @@ export const PdfUploadPage = () => {
         <div style={{ marginTop: 16, color: "crimson" }}>
           <b>Error:</b> {err}
         </div>
+      )}
+      <h2>Summary</h2>
+      {reqSummary && (
+        <pre style={{ marginTop: 16, padding: 12, overflowX: "auto" }}>
+          {JSON.stringify(reqSummary, null, 2)}
+        </pre>
       )}
       
       <h2>Progress: {credits}/120</h2>
