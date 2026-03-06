@@ -615,14 +615,14 @@ const determineStudentStatus = (requirements, gpa) => {
         return 'Academic Warning';
     }
 
-    if (requirements.overall.totalCredits.percentComplete >= 75) {
-        return 'Senior Standing';
+    if (requirements.overall.totalCredits.completed >= 90) {
+        return 'Year 4+';
     } else if (requirements.overall.totalCredits.completed >= 60) {
-        return 'Junior Standing';
+        return 'Year 3';
     } else if (requirements.overall.totalCredits.completed >= 30) {
-        return 'Sophomore Standing';
+        return 'Year 2';
     } else {
-        return 'Freshman Standing';
+        return 'Year 1';
     }
 };
 
