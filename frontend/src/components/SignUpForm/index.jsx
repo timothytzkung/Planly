@@ -6,7 +6,7 @@ import { TermsCheckbox } from "../TermsCheckbox";
 import styles from "./SignUpForm.module.css"
 
 export const SignUpForm = () => {
-    const [form, setForm] = useState({ name: "", studentId: "", email: "", password: "", repeatPassword: "" });
+    const [form, setForm] = useState({ name: "", studentId: "", email: "", password: "", confirmPassword: "" });
     const [agreed, setAgreed] = useState(false);
     const [submitted, setSubmitted] = useState(false);
 
@@ -16,8 +16,8 @@ export const SignUpForm = () => {
         form.studentId &&
         form.email &&
         form.password &&
-        form.repeatPassword &&
-        form.password === form.repeatPassword &&
+        form.confirmPassword &&
+        form.password === form.confirmPassword &&
         agreed;
 
     const handleSubmit = () => {
@@ -33,7 +33,7 @@ export const SignUpForm = () => {
                 <button
                     onClick={() => {
                         setSubmitted(false);
-                        setForm({ name: "", studentId: "", email: "", password: "", repeatPassword: "" });
+                        setForm({ name: "", studentId: "", email: "", password: "", confirmPassword: "" });
                         setAgreed(false);
                     }}
                     className={styles.backButton}
@@ -51,14 +51,14 @@ export const SignUpForm = () => {
             <InputField label="Email" type="email" placeholder="asdf@sfu.ca" value={form.email} onChange={update("email")} autoComplete="email" />
             <InputField label="Password" type="password" placeholder="••••••••••••" value={form.password} onChange={update("password")} autoComplete="new-password" />
             <InputField
-                label="Repeat Password"
+                label="Confirm Password"
                 type="password"
                 placeholder="••••••••••••"
-                value={form.repeatPassword}
-                onChange={update("repeatPassword")}
+                value={form.confirmPassword}
+                onChange={update("confirmPassword")}
                 autoComplete="new-password"
             />
-            {form.password && form.repeatPassword && form.password !== form.repeatPassword && (
+            {form.password && form.confirmPassword && form.password !== form.confirmPassword && (
                 <p className={styles.errorText}>Passwords do not match</p>
             )}
             <TermsCheckbox checked={agreed} onChange={() => setAgreed(!agreed)} />
