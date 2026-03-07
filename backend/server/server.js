@@ -12,6 +12,11 @@ const cors = require("cors"); // Import the CORS package
 const mongoose = require("mongoose");
 require("dotenv").config();
 
+// Routes
+const sfuCourseRoutes = require('./routes/sfuCourses')
+const authRoutes = require("./routes/auth")
+const uploadRoutes = require("./routes/upload");
+
 // In-house functions
 import { parseTranscriptByTerm } from "./utils/parse.js";
 import { transcriptAnalyzer } from "./controllers/transcriptAnalyzer.js";
@@ -66,12 +71,6 @@ API Ports
 ################################################
 */
 
-
-// Hello API route
-app.get("/api/hello", (req, res) => {
-  res.json({ message: "Hello from the Node backend!" });
-});
-
 // Parse API route (req includes => {formData})
 app.post("/api/parse", upload.single("pdf"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file seen" });
@@ -93,58 +92,7 @@ app.post("/api/parse", upload.single("pdf"), async (req, res) => {
   res.json({ transcript: fin });
 });
 
-// SFU API courses in dept. route (req includes => {year, term, department })
-app.post("/api/courses", async (req, res) => {
-  if (!req.body) return res.status(400).json({ error: "No body attached" });
-
-  // Destruct
-  const { year, term, department } = req.body;
-
-  // Fetch
-  const url = `http://www.sfu.ca/bin/wcm/course-outlines?${year}/${term}/${department}`
-  const response = await fetch(url, {
-    method: "GET"
-  })
-  // No parsing needed because SFU api parsed it already
-  const data = await response.json();
-  res.json({ courses: data });
-})
-
-// SFU API course sections route (req includes => {year, term, department, courseNumber})
-app.post("/api/course-sections", async (req, res) => {
-  if (!req.body) return res.status(400).json({ error: "No body attached" });
-
-  // Destruct
-  const { year, term, department, courseNumber } = req.body;
-
-  // Fetch
-  const url = `http://www.sfu.ca/bin/wcm/course-outlines?${year}/${term}/${department}/${courseNumber}`
-  const response = await fetch(url, {
-    method: "GET"
-  })
-  // No parsing needed because SFU api parsed it already
-  const data = await response.json();
-  res.json({ courses: data });
-})
-
-// SFU API course outline route (req includes => {year, term, department, courseNumber, courseSection})
-app.post("/api/course-outline", async (req, res) => {
-  if (!req.body) return res.status(400).json({ error: "No body attached" });
-
-  // Destruct
-  const { year, term, department, courseNumber, courseSection } = req.body;
-
-  // Fetch
-  const url = `http://www.sfu.ca/bin/wcm/course-outlines?${year}/${term}/${department}/${courseNumber}/${courseSection}`
-  const response = await fetch(url, {
-    method: "GET"
-  })
-  // No parsing needed because SFU api parsed it already
-  const data = await response.json();
-  res.json({ courses: data });
-})
-
-
+// Check requirements stuff
 app.post("/api/check-requirements", async (req, res) => {
   if (!req.body) return res.status(400).json({ error: "No body attached" });
 
@@ -158,6 +106,11 @@ app.post("/api/check-requirements", async (req, res) => {
 
   res.json({ result: fin });
 })
+
+// API
+app.use("/api/sfuCourses", sfuCourseRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // Listen
 app.listen(PORT, () => {
