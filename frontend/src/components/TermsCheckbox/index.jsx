@@ -48,7 +48,7 @@ export const TermsCheckbox = ({ checked, onChange }) => {
                     onClick={e => e.stopPropagation()}
                     style={{ color: "#cc1f36", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
                 >
-                    terms of service
+                    Terms of Service
                 </span>{" "}
                 and understand my transcript data is stored securely.
             </span>

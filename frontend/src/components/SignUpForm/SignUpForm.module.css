@@ -30,3 +30,9 @@
     cursor: pointer;
     font-size: 14px;
 }
+
+.errorText {
+    color: var(--SFU_RED);
+    font-size: 12px;
+    margin-top: 4px;
+}
