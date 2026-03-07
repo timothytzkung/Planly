@@ -6,10 +6,15 @@ import styles from "./LandingView.module.css";
 import { useEffect, useState } from "react";
 import logo from "../../assets/logo.svg"
 
+import { Navigate, useNavigate } from "react-router-dom"; 
+
+
 export const LandingView = ({ mounted }) => {
 
     const SFU_DARK_RED = "#A3002B";
     const SFU_RED = "#CC0633";
+
+    const navigate = useNavigate();
 
     // I'm using some inline styling so I can use the useEffect shiz
     return (
@@ -20,9 +25,8 @@ export const LandingView = ({ mounted }) => {
                     height: "70px"
                 }}/>
                 <div className={styles.buttonContainer}>
-                    <SecondaryButton label={"Log In"} />
-                    <PrimaryButton label={"Get Started →"} />
-
+                    <SecondaryButton label={"Log In"} onClick={() => navigate("/login")}/>
+                    <PrimaryButton label={"Get Started →"} onClick={() => navigate("/login")}/>
                 </div>
             </div>
 
@@ -43,7 +47,6 @@ export const LandingView = ({ mounted }) => {
                 Your degree,{" "}
                 <span style={{
                     color: SFU_RED,
-                    fontStyle: "italic",
                     position: "relative",
                     display: "inline-block",
                 }}>
@@ -86,7 +89,7 @@ export const LandingView = ({ mounted }) => {
                 transition: "opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s",
             }}>
                 <PrimaryButton label={"Upload your PDF →"} />
-                <SecondaryButton label={"Log In"}/>
+                <SecondaryButton label={"Log In"} onClick={() => navigate("/login")}/>
             </div>
         </main>
     )
