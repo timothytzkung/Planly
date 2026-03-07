@@ -6,8 +6,6 @@ import ProtectedRoute from "./wrappers/ProtectedRoute";
 import { PdfUploadPage } from "./views/test/PdfUploadPage";
 import { SFUCoursesPage } from "./views/test/SFUCoursesPage";
 
-
-
 import { LandingView } from "./views/LandingView";
 import { AuthView } from "./views/AuthView";
 
@@ -16,11 +14,10 @@ function App() {
   const [pdfFile, setPdfFile] = useState("");
   const [mounted, setMounted] = useState(false);
 
-  const [currentView, setCurrentView] = useState("LandingView")
 
   useEffect(() => {
     setMounted(true);
-  },[currentView])
+  },[])
 
   const BACK_PORT = 5050;
 

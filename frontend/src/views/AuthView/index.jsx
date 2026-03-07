@@ -75,7 +75,7 @@ const Card = ({ activeTab, onTabChange }) => {
 
 // Auth view handler
 export const AuthView = () => {
-    const [activeTab, setActiveTab] = useState("Create Account");
+    const [activeTab, setActiveTab] = useState("Log In");
     const navigate = useNavigate();
 
     return (

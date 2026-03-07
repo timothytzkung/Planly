@@ -42,21 +42,21 @@ const parseTranscriptData = (transcriptData) => {
         for (const course of termCourses) {
             if (course.status === 'withdrawn') continue;
 
-            const courseCode = `${course.faculty} ${course['course-number']}`;
-            const courseLevel = Math.floor(parseInt(course['course-number']) / 100) * 100;
+            const courseCode = `${course.faculty} ${course['courseNumber']}`;
+            const courseLevel = Math.floor(parseInt(course['courseNumber']) / 100) * 100;
 
             courses.push({
                 courseCode,
-                courseName: course['course-name'],
+                courseName: course['courseName'],
                 faculty: course.faculty,
-                courseNumber: course['course-number'],
+                courseNumber: course['courseNumber'],
                 credits: course.credits,
                 grade: course.grade,
                 courseLevel,
                 term,
                 status: course.status,
-                classAverage: course['class-average'],
-                classSize: course['class-size']
+                classAverage: course['classAverage'],
+                classSize: course['classSize']
             });
         }
     }
