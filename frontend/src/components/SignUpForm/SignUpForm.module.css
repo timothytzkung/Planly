@@ -1,0 +1,32 @@
+@import "../../App.css";
+
+.successContainer {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.successEmoji {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.successTitle {
+    font-weight: 700;
+    color: #1a1a1a;
+    font-size: 22px;
+}
+
+.successText {
+    color: #666;
+    font-size: 14px;
+}
+
+.backButton {
+    margin-top: 18px;
+    color: var(--SFU_RED);
+    background: none;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+}
