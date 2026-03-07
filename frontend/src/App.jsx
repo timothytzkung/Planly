@@ -1,11 +1,22 @@
 import React, { useEffect, useState } from "react";
 
-import { PdfUploadPage } from "./test/PdfUploadPage";
-import { SFUCoursesPage } from "./test/SFUCoursesPage";
+import { PdfUploadPage } from "./views/test/PdfUploadPage";
+import { SFUCoursesPage } from "./views/test/SFUCoursesPage";
+
+import { PrimaryButton } from "./components/PrimaryButton";
+import { SecondaryButton } from "./components/SecondaryButton";
+
+
+import { LandingView } from "./views/LandingView";
 
 function App() {
   const [message, setMessage] = useState("");
   const [pdfFile, setPdfFile] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  },[])
 
   const BACK_PORT = 5050;
 
@@ -23,10 +34,15 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Planly</h1>
-      <p>Server says: {message}</p>
+      <LandingView mounted={mounted}/>
+
+      {/* <h1>Planly</h1>
+      <p>Server says: {message}</p> */}
+      {/* <PrimaryButton label={"Primary Button"}/>
+      <SecondaryButton label={"Secondary Button"} />
       <PdfUploadPage />
-      <SFUCoursesPage />
+      <SFUCoursesPage /> */}
+
     </div>
   );
 }

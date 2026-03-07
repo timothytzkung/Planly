@@ -1,0 +1,15 @@
+@import "../../App.css";
+
+.SecondaryButton {
+    margin: auto;
+    padding: 14px 32px;
+    border: 1.5px solid #ccc;
+    border-radius: 10px;
+    background: transparent;
+    font-size: 1rem;
+    color: #333;
+    cursor: pointer;
+    font-weight: 200;
+    letter-spacing: 0.3px;
+    transition: all 0.2s;
+}
