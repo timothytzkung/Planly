@@ -1,0 +1,14 @@
+@import "../../App.css";
+
+.textContainer {
+    text-align: right;
+    margin-bottom: 18px;
+    margin-top: -8px;
+}
+
+.inlineText {
+    font-size: 13px;
+    color: var(--SFU_RED);
+    font-weight: 600;
+    cursor: pointer;
+}
