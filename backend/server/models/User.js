@@ -1,32 +1,29 @@
 const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema({
-    _id: ObjectId,
-    username: {
+    name: {
         type: String,
         required: true,
         unique: true, // no two users can have the same name
+    },
+    studentID: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true
     },
     password: {
         type: String,
         required: true,
     },
-    name: String,
-    email: String,
-    profilePictureUrl: String,
-    program: String, // e.g., "SIAT", "Computing Science"
-    major: String,
-    concentration: [String],
-    isAdmin: Boolean,
-    createdAt: Date,
-    updatedAt: Date,
-    savedCourses: [String], // Array of course codes
-    transcriptUploaded: Boolean,
     transcriptData: { // Might add transcript schema for summary? idk
         uploadDate: Date,
-        fileName: String,
-        summary: String //  Currently gonna just stringify the JSON
+        data: String //  Currently gonna just stringify the JSON
     }
 });
 
-module.exports = mongoose.model("User", UserSchema);
+module.exports = mongoose.model("User", UserSchema, "users");

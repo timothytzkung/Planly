@@ -14,6 +14,7 @@ require("dotenv").config();
 
 // Routes
 const sfuCourseRoutes = require('./routes/sfuCourses')
+const authRoutes = require("./routes/auth")
 
 // In-house functions
 import { parseTranscriptByTerm } from "./utils/parse.js";
@@ -69,12 +70,6 @@ API Ports
 ################################################
 */
 
-
-// Hello API route
-app.get("/api/hello", (req, res) => {
-  res.json({ message: "Hello from the Node backend!" });
-});
-
 // Parse API route (req includes => {formData})
 app.post("/api/parse", upload.single("pdf"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file seen" });
@@ -112,7 +107,8 @@ app.post("/api/check-requirements", async (req, res) => {
 })
 
 // API
-app.use("/api/sfuCourses", sfuCourseRoutes); 
+app.use("/api/sfuCourses", sfuCourseRoutes);
+app.use("/api/auth", authRoutes);
 
 // Listen
 app.listen(PORT, () => {
