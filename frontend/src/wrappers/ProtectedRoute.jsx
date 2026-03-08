@@ -10,9 +10,8 @@ function ProtectedRoute({ children }) {
 
   // if the token is null (meaning the user is logged out or their token expired)
   if (!token) {
-    // immediately bounce them back to the login page
-    // <Navigate /> renders a redirect instantly without the user doing anything
-    return <Navigate to="/home" />;
+    // unauthenticated users should go to the login screen
+    return <Navigate to="/login" />;
   }
 
   // access Granted

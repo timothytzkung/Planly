@@ -1,5 +1,6 @@
-import { jwtDecode } from "jwt-decode";
+import jwtDecode from "jwt-decode";
 import { createContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // create the Context object to be consumed by other components
 export const AuthContext = createContext();
@@ -10,6 +11,8 @@ export function AuthProvider({ children }) {
   // prevents the ProtectedRoute from redirecting to Login
   const [token, setToken] = useState(localStorage.getItem("token") || null);
   const [user, setUser] = useState(null);
+
+  const navigate = useNavigate();
 
   // useEffect runs whenever the token changes (login, logout, or initial load)
   useEffect(() => {
@@ -39,7 +42,8 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("token"); // remove from browser memory
     setToken(null); // reset state
     setUser(null);
-    navigate("/home")
+    // send user back to login after signing out
+    navigate("/login");
   }
 
   return (

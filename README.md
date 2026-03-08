@@ -13,3 +13,6 @@ SFU Planly is a degree planning web app for SFU students. Students can upload th
 `npm run backend` will run only the backend<br>
 
 Backend server currently hosted on port 5050, frontend hosted on 5173.
+
+🛠 Try it out: start the server (node backend/server/server.js or equivalent) and run the frontend (npm run dev in frontend).
+Access /register to create an account, /login to sign in, then / to see the protected upload page with greeting and data‑saving capabilities.

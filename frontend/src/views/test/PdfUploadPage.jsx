@@ -40,6 +40,10 @@ export const PdfUploadPage = () => {
 
   const saveToDB = async (e) => {
     e.preventDefault();
+    if (!token) {
+      alert("You must be logged in to save a transcript");
+      return;
+    }
     if (transcript) {
       try {
         const res = await fetch(`http://localhost:${BACK_PORT}/api/transcript/upload`, {
@@ -68,6 +72,10 @@ export const PdfUploadPage = () => {
 
   const deleteFromDB = async () => {
     // Searches for transcript by owner id
+    if (!token) {
+      alert("You must be logged in to delete a transcript");
+      return;
+    }
     try {
       const res = await fetch(`http://localhost:${BACK_PORT}/api/transcript/`, {
         method: "DELETE",
@@ -164,39 +172,39 @@ export const PdfUploadPage = () => {
   }, [transcript, loading, fileIsUploaded, file])
 
   
-  // useEffect(() => {
-  //   if (!transcript) {
-  //     console.log("Search for transcript...");
-  
-  //     const getTranscript = async () => {
-  //       try {
-  //         const response = await fetch(`http://localhost:${BACK_PORT}/api/transcript`, {
-  //           method: "GET",
-  //           headers: {
-  //             Authorization: token,
-  //             "Content-Type": "application/json",
-  //           },
-  //         });
-  
-  //         if (!response.ok) {
-  //           throw new Error(`Request failed: ${response.status}`);
-  //         }
-  
-  //         const data = await response.json();
-  //         console.log("Fetched transcript response:", data);
-  
-  //         const savedTranscript = data.transcript; 
-  //         console.log("Transcript from response:", savedTranscript);
-  
-  //         setTranscript(savedTranscript);
-  //       } catch (e) {
-  //         console.log("No transcript found:", e);
-  //       }
-  //     };
-  
-  //     getTranscript();
-  //   }
-  // }, [transcript, token]);
+  useEffect(() => {
+    if (!transcript && token) {
+      console.log("Search for transcript...");
+
+      const getTranscript = async () => {
+        try {
+          const response = await fetch(`http://localhost:${BACK_PORT}/api/transcript`, {
+            method: "GET",
+            headers: {
+              Authorization: token,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`Request failed: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log("Fetched transcript response:", data);
+
+          const savedTranscript = data.transcript; 
+          console.log("Transcript from response:", savedTranscript);
+
+          setTranscript(savedTranscript);
+        } catch (e) {
+          console.log("No transcript found:", e);
+        }
+      };
+
+      getTranscript();
+    }
+  }, [transcript, token]);
 
   return (
     <div style={{ maxWidth: 720, margin: "40px auto", padding: 16 }}>

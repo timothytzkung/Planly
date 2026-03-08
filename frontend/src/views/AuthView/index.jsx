@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './AuthView.module.css';
 import logo from "../../assets/logo.svg"
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -74,9 +74,18 @@ const Card = ({ activeTab, onTabChange }) => {
 
 
 // Auth view handler
-export const AuthView = () => {
-    const [activeTab, setActiveTab] = useState("Log In");
+export const AuthView = ({ initialTab }) => {
+    const [activeTab, setActiveTab] = useState(initialTab || "Log In");
     const navigate = useNavigate();
+
+    // keep the URL in sync with the tab so we have both /login and /register
+    useEffect(() => {
+      if (activeTab === "Log In") {
+        navigate("/login", { replace: true });
+      } else {
+        navigate("/register", { replace: true });
+      }
+    }, [activeTab, navigate]);
 
     return (
         <>

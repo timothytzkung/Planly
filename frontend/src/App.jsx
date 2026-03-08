@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./wrappers/ProtectedRoute";
@@ -10,14 +10,7 @@ import { LandingView } from "./views/LandingView";
 import { AuthView } from "./views/AuthView";
 
 function App() {
-  const [message, setMessage] = useState("");
-  const [pdfFile, setPdfFile] = useState("");
-  const [mounted, setMounted] = useState(false);
-
-
-  useEffect(() => {
-    setMounted(true);
-  },[])
+  // state for demo components has been retired
 
   const BACK_PORT = 5050;
 
@@ -38,8 +31,9 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            <Route path="/home" element={ <LandingView mounted={mounted}/> }/>
+            <Route path="/home" element={ <LandingView /> }/>
             <Route path="/login" element={ <AuthView />} />
+            <Route path="/register" element={ <AuthView initialTab="Create Account" />} />
 
             {/* Protected Routes */}
             <Route 
@@ -55,21 +49,7 @@ function App() {
         </Router>
       </AuthProvider>
 
-      {/* {currentView === "LandingView" ? 
-        <LandingView mounted={mounted} /> :
-        <>There was an error loading the page!</>  
-      } */}
-      {/* {currentView === "LandingView" ? 
-        <AuthView /> :
-        <>There was an error loading the page!</> 
-      } */}
-      {/* <h1>Planly</h1>
-      <p>Server says: {message}</p> */}
-      {/* <PrimaryButton label={"Primary Button"}/>
-      <SecondaryButton label={"Secondary Button"} />
-      <PdfUploadPage />
-      <SFUCoursesPage /> */}
-
+      {/* legacy demo code removed */}
     </div>
   );
 }
