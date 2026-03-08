@@ -26,7 +26,7 @@ export const LogInForm = () => {
     // If token exists, redirect to dash
     useEffect(() => {
         if (token) {
-            navigate("/")
+            navigate("/dashboard")
         }
     },[token, navigate, formData])
 
@@ -49,7 +49,7 @@ export const LogInForm = () => {
                 if (response.ok) {
                     login(data.token);
                     setSubmitted(true)
-                    navigate("/");
+                    navigate("/dashboard");
                 } else {
                     setError(data.message || "Invalid Credentials")
                 } 

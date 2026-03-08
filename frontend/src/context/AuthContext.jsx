@@ -39,7 +39,6 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("token"); // remove from browser memory
     setToken(null); // reset state
     setUser(null);
-    navigate("/home")
   }
 
   return (
