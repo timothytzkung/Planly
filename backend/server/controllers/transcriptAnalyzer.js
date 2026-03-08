@@ -42,21 +42,21 @@ const parseTranscriptData = (transcriptData) => {
         for (const course of termCourses) {
             if (course.status === 'withdrawn') continue;
 
-            const courseCode = `${course.faculty} ${course['course-number']}`;
-            const courseLevel = Math.floor(parseInt(course['course-number']) / 100) * 100;
+            const courseCode = `${course.faculty} ${course['courseNumber']}`;
+            const courseLevel = Math.floor(parseInt(course['courseNumber']) / 100) * 100;
 
             courses.push({
                 courseCode,
-                courseName: course['course-name'],
+                courseName: course['courseName'],
                 faculty: course.faculty,
-                courseNumber: course['course-number'],
+                courseNumber: course['courseNumber'],
                 credits: course.credits,
                 grade: course.grade,
                 courseLevel,
                 term,
                 status: course.status,
-                classAverage: course['class-average'],
-                classSize: course['class-size']
+                classAverage: course['classAverage'],
+                classSize: course['classSize']
             });
         }
     }
@@ -81,7 +81,7 @@ const calculateGPAs = (courses) => {
         c.grade !== null
     );
 
-    const iatCourses = completedWithGrades.filter(c => c.faculty === 'IAT');
+    const majorCourses = completedWithGrades.filter(c => c.faculty === 'IAT');
 
     // Calculate overall GPA
     const overallGradePoints = completedWithGrades.reduce((sum, c) => {
@@ -93,13 +93,13 @@ const calculateGPAs = (courses) => {
     const overallGPA = overallCredits > 0 ? overallGradePoints / overallCredits : 0;
 
     // Calculate IAT GPA
-    const iatGradePoints = iatCourses.reduce((sum, c) => {
+    const majorGradePoints = majorCourses.reduce((sum, c) => {
         const points = gradePoints[c.grade] || 0;
         return sum + (points * c.credits);
     }, 0);
 
-    const iatCredits = iatCourses.reduce((sum, c) => sum + c.credits, 0);
-    const iatGPA = iatCredits > 0 ? iatGradePoints / iatCredits : 0;
+    const majorCredits = majorCourses.reduce((sum, c) => sum + c.credits, 0);
+    const majorGPA = majorCredits > 0 ? majorGradePoints / majorCredits : 0;
 
     // Calculate term-by-term GPA
     const termGPAs = {};
@@ -122,11 +122,11 @@ const calculateGPAs = (courses) => {
             courses: completedWithGrades.length,
             meetsMinimum: overallGPA >= 2.0
         },
-        iat: {
-            gpa: parseFloat(iatGPA.toFixed(2)),
-            credits: iatCredits,
-            courses: iatCourses.length,
-            meetsMinimum: iatGPA >= 2.4
+        major: {
+            gpa: parseFloat(majorGPA.toFixed(2)),
+            credits: majorCredits,
+            courses: majorCourses.length,
+            meetsMinimum: majorGPA >= 2.4
         },
         byTerm: termGPAs,
         gradeDistribution: calculateGradeDistribution(completedWithGrades)
@@ -209,7 +209,7 @@ const checkLowerDivRequired = (completed, inProgress) => {
 };
 
 /**
- * Check Lower Division Electives
+ * Check Lower Division Electives (200lvl)
  */
 const checkLowerDivElectives = (completed, inProgress) => {
     const electives = [
@@ -222,7 +222,7 @@ const checkLowerDivElectives = (completed, inProgress) => {
     const completedElectives = completed.filter(c => electives.includes(c.courseCode));
 
     return {
-        name: 'Lower Division - Elective Courses',
+        name: 'Lower Division - 200 LVL Courses',
         required: 5,
         completed: completedElectives.length,
         inProgress: takenElectives.length - completedElectives.length,
@@ -244,19 +244,18 @@ const checkLowerDivElectives = (completed, inProgress) => {
  * Check Upper Division Required (IAT 309W)
  */
 const checkUpperDivRequired = (completed, inProgress) => {
-    const has309W = completed.some(c => c.courseCode === 'IAT 309W');
-    const inProgress309W = inProgress.some(c => c.courseCode === 'IAT 309W');
+    const hasUpperDivW = completed.some(c => c.courseCode === 'IAT 309W');
+    const inProgressUpperDivW = inProgress.some(c => c.courseCode === 'IAT 309W');
 
     return {
         name: 'Upper Division - Required Course (IAT 309W)',
         required: 1,
-        completed: has309W ? 1 : 0,
-        inProgress: inProgress309W ? 1 : 0,
+        completed: hasUpperDivW ? 1 : 0,
+        inProgress: inProgressUpperDivW ? 1 : 0,
         creditsRequired: 4,
-        creditsCompleted: has309W ? 4 : 0,
-        isMet: has309W,
-        course: has309W ? completed.find(c => c.courseCode === 'IAT 309W') : null,
-        note: 'Must be completed before taking 400-level courses'
+        creditsCompleted: hasUpperDivW ? 4 : 0,
+        isMet: hasUpperDivW,
+        course: hasUpperDivW ? completed.find(c => c.courseCode === 'IAT 309W') : null
     };
 };
 
@@ -335,18 +334,6 @@ const check400Level = (completed, inProgress) => {
     };
 };
 
-
-// Check if course exists
-const getDesignations = async (courseNumber) => {
-    const normalized = courseNumber.trim().toUpperCase();
-
-    const doc = await WQBCourse.findOne(
-        { courseNumber: normalized },
-        { designations: 1, _id: 0 }
-    ).lean();
-
-    return doc?.designations ?? [];
-}
 
 /**
  * Check WQB Requirements
@@ -434,7 +421,6 @@ const checkWQB = async (completed, inProgress) => {
                 name: c.courseName,
                 credits: c.credits,
                 grade: c.grade,
-                term: c.term,
                 // Extract year from term string (e.g., "2021 Summer" -> 2021)
                 year: parseInt(c.term.split(' ')[0]),
                 // Extract season from term string (e.g., "2021 Summer" -> "Summer")
@@ -451,9 +437,8 @@ const checkWQB = async (completed, inProgress) => {
                 name: c.courseName,
                 credits: c.credits,
                 grade: c.grade,
-                term: c.term,
                 year: parseInt(c.term.split(' ')[0]),
-                season: c.term.split(' ')[1],
+                term: c.term.split(' ')[1],
                 level: c.courseLevel
             }))
         },
@@ -467,9 +452,8 @@ const checkWQB = async (completed, inProgress) => {
                     name: c.courseName,
                     credits: c.credits,
                     grade: c.grade,
-                    term: c.term,
                     year: parseInt(c.term.split(' ')[0]),
-                    season: c.term.split(' ')[1],
+                    term: c.term.split(' ')[1],
                     level: c.courseLevel
                 }))
             },
@@ -482,9 +466,8 @@ const checkWQB = async (completed, inProgress) => {
                     name: c.courseName,
                     credits: c.credits,
                     grade: c.grade,
-                    term: c.term,
                     year: parseInt(c.term.split(' ')[0]),
-                    season: c.term.split(' ')[1],
+                    term: c.term.split(' ')[1],
                     level: c.courseLevel
                 }))
             },
@@ -521,9 +504,8 @@ const checkWQB = async (completed, inProgress) => {
                         name: c.courseName,
                         credits: c.credits,
                         grade: c.grade,
-                        term: c.term,
                         year: parseInt(c.term.split(' ')[0]),
-                        season: c.term.split(' ')[1],
+                        term: c.term.split(' ')[1],
                         level: c.courseLevel
                     }))
             }
@@ -546,15 +528,15 @@ const checkOverallProgress = (completed, inProgress) => {
         .filter(c => c.courseLevel >= 300)
         .reduce((sum, c) => sum + c.credits, 0);
 
-    const upperDivIATCompleted = completed
+    const upperDivMajorCompleted = completed
         .filter(c => c.faculty === 'IAT' && c.courseLevel >= 300)
         .reduce((sum, c) => sum + c.credits, 0);
 
-    const upperDivIATInProgress = inProgress
+    const upperDivMajorInProgress = inProgress
         .filter(c => c.faculty === 'IAT' && c.courseLevel >= 300)
         .reduce((sum, c) => sum + c.credits, 0);
 
-    const upperDivIATCourseCount = completed
+    const upperDivMajorCourseCount = completed
         .filter(c => c.faculty === 'IAT' && c.courseLevel >= 300).length;
 
     return {
@@ -573,14 +555,14 @@ const checkOverallProgress = (completed, inProgress) => {
             total: upperDivCompleted + upperDivInProgress,
             remaining: Math.max(0, 44 - upperDivCompleted - upperDivInProgress)
         },
-        upperDivisionIAT: {
+        upperDivisionMajor: {
             unitsRequired: 32,
-            unitsCompleted: upperDivIATCompleted,
-            unitsInProgress: upperDivIATInProgress,
+            unitsCompleted: upperDivMajorCompleted,
+            unitsInProgress: upperDivMajorInProgress,
             coursesRequired: 8,
-            coursesCompleted: upperDivIATCourseCount,
-            meetsUnits: (upperDivIATCompleted + upperDivIATInProgress) >= 32,
-            meetsCourses: upperDivIATCourseCount >= 8
+            coursesCompleted: upperDivMajorCourseCount,
+            meetsUnits: (upperDivMajorCompleted + upperDivMajorInProgress) >= 32,
+            meetsCourses: upperDivMajorCourseCount >= 8
         }
     };
 };
@@ -599,8 +581,8 @@ const generateSummary = (courses, gpa, requirements) => {
         percentComplete: requirements.overall.totalCredits.percentComplete,
         gpa: {
             overall: gpa.overall.gpa,
-            iat: gpa.iat.gpa,
-            meetsRequirements: gpa.overall.meetsMinimum && gpa.iat.meetsMinimum
+            major: gpa.major.gpa,
+            meetsRequirements: gpa.overall.meetsMinimum && gpa.major.meetsMinimum
         },
         estimatedGraduation: estimateGraduation(requirements.overall.totalCredits.remaining),
         termsCompleted: new Set(completed.map(c => c.term)).size
@@ -611,7 +593,7 @@ const generateSummary = (courses, gpa, requirements) => {
  * Determine student status
  */
 const determineStudentStatus = (requirements, gpa) => {
-    if (!gpa.overall.meetsMinimum || !gpa.iat.meetsMinimum) {
+    if (!gpa.overall.meetsMinimum || !gpa.major.meetsMinimum) {
         return 'Academic Warning';
     }
 

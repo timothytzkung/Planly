@@ -12,7 +12,7 @@ export const SFUCoursesPage = () => {
   // Get all courses from specific dept in that year
   const getCourses = async(_year, _term, _department) => {
     // Fetch
-    const response = await fetch(`http://localhost:${BACK_PORT}/api/courses`, {
+    const response = await fetch(`http://localhost:${BACK_PORT}/api/sfuCourses/courses`, {
       method: "POST",
       headers: {
         "Accept": "application/json",
@@ -33,7 +33,7 @@ export const SFUCoursesPage = () => {
   // get specific course info (returns all course sections available in that term)
   const getCourseInfo = async(_year, _term, _department, _courseNumber) => {
     // Fetch
-    const response = await fetch(`http://localhost:${BACK_PORT}/api/course-sections`, {
+    const response = await fetch(`http://localhost:${BACK_PORT}/api/sfuCourses/course-sections`, {
       method: "POST",
       headers: {
         "Accept": "application/json",
@@ -55,7 +55,7 @@ export const SFUCoursesPage = () => {
   // gets specific course outline ==> returns info about course, instructor, schedule, reqs, etc.
   const getCourseOutline = async(_year, _term, _department, _courseNumber, _courseSection) => {
     // Fetch
-    const response = await fetch(`http://localhost:${BACK_PORT}/api/course-outline`, {
+    const response = await fetch(`http://localhost:${BACK_PORT}/api/sfuCourses/course-outline`, {
       method: "POST",
       headers: {
         "Accept": "application/json",

@@ -87,13 +87,13 @@ export const parseTranscriptByTerm = (text) => {
         : "completed";
 
     result[currentTerm].push({
-      "course-name": courseName,
+      "courseName": courseName,
       "faculty": faculty,
-      "course-number": courseNumber,
+      "courseNumber": courseNumber,
       "credits": credits,
       "grade": grade,
-      "class-average": classAverage,
-      "class-size": classSize,
+      "classAverage": classAverage,
+      "classSize": classSize,
       "status": status
     });
   }
@@ -133,13 +133,13 @@ export const parseTranscript = (transcriptText) => {
     const isInProgress = grade === "-" || _gradePoints === "-";
 
     courses.push({
-      "course-name": courseName,
+      "courseName": courseName,
       "faculty": faculty,
-      "course-number": courseNumber,
+      "courseNumber": courseNumber,
       "credits": parseFloat(credits),
       "grade": isInProgress ? null : grade,
-      "class-average": classAverage === "-" ? null : classAverage,
-      "class-size": parseInt(classSize, 10),
+      "classAverage": classAverage === "-" ? null : classAverage,
+      "classSize": parseInt(classSize, 10),
       "status": isInProgress ? "in-progress" : "completed"
     });
   }
