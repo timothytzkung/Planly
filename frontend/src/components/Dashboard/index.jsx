@@ -1,17 +1,20 @@
 
 import styles from "./Dashboard.module.css"
-import { useEffect } from "react";
+import { useEffect, useState, useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
 // Dashboard view, props will contain data?
 export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript, summary }) => {
-
     // Destruct summary if exists
     const { 
         creditsCompleted, creditsInProgress, percentComplete, studentStatus
-    } = summary?.summary;
+    } = summary?.summary || 0;
 
     // Array of courses
-    const { timeline } = summary.timeline;
+    const { timeline } = summary?.timeline || 0;
+
+      // Destructure to use contexts
+    const { token, user, logout } = useContext(AuthContext);
 
     const courses = [
         { name: "MACM 100", credits: 3, tag: "SIAT", accent: `${styles.siatBlue}` },
@@ -27,8 +30,7 @@ export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript
     ];
 
     useEffect(() => {
-        console.log("DashCompon Summary: ", summary)
-        console.log("DashComp, creds: ", creditsCompleted ?? 0)
+        
     }, [summary])
 
 
@@ -36,10 +38,17 @@ export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript
         <div className={styles.container}>
             {/* Header */}
             <div className={styles.header}>
-                <h1 className={styles.yearTitle}>{studentStatus}</h1>
+                <h1 className={styles.yearTitle}>{studentStatus || "Year 1"}</h1>
                 <div className={styles.headerProgress}>
-                    <span>{creditsCompleted ?? 0} of 120 credits completed</span>
-                    <div className={styles.miniBar}><div className={styles.miniBarFill} /></div>
+                    <span>{creditsCompleted || 0} of 120 credits completed</span>
+                    <div className={styles.miniBar}>
+                        <div 
+                        className={styles.miniBarFill} 
+                        style={{
+                            width: `${creditsCompleted/120 * 100}%`
+                        }}
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -70,7 +79,10 @@ export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript
                     <a className={styles.viewLink}>View Degree →</a>
                 </div>
                 <div className={styles.degreeProgressBar}>
-                    <div className={styles.degreeProgressFill} />
+                    <div className={styles.degreeProgressFill} 
+                    style={{
+                            width: `${creditsCompleted/120 * 100}%`
+                        }}/>
                 </div>
                 <div className={styles.degreeStats}>
                     <span>{creditsCompleted ?? 0}  credits completed</span>
@@ -82,7 +94,7 @@ export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript
             <div className={styles.statsGrid}>
                 <div className={styles.statCard}>
                     <div className={styles.statLabel}>Credits Earned</div>
-                    <div className={`${styles.statValue} ${styles.statCredits}`}>{creditsCompleted}<span className={styles.denom}>/120</span></div>
+                    <div className={`${styles.statValue} ${styles.statCredits}`}>{creditsCompleted ?? 0}<span className={styles.denom}>/120</span></div>
                 </div>
                 <div className={styles.statCard}>
                     <div className={styles.statLabel}>Courses Completed</div>
@@ -98,7 +110,7 @@ export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript
                         <div className={`${styles.statValue} ${styles.statSemester}`}>
                             Fall
                         </div>
-                        <span className={styles.statSemesterYear}> 2025</span>
+                        <span className={styles.statSemesterYear}>2026</span>
                     </div>
 
 

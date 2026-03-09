@@ -10,6 +10,7 @@ import { SecondaryButton } from "../SecondaryButton";
 // Context
 import { AuthContext } from "../../context/AuthContext";
 
+
 // Temporary icons before using matUI
 const HomeIcon = () => (
   <svg className={styles.navIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -78,7 +79,7 @@ export const Sidebar = () => {
         <div className={styles.profile}>
           <div className={styles.avatar}>TD</div>
           <div className={styles.profileInfo}>
-            <h2 className={styles.profileInfoH2}>Tyrone Dukay-Remulta</h2>
+            <h2 className={styles.profileInfoH2}>{user?.name || "Guest"}</h2>
             <span className={styles.profileInfoSpan}> SIAT Major | BSc</span>
           </div>
         </div>
