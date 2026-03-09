@@ -1,6 +1,5 @@
-.dashboard {
+
+
+.layout {
     display: flex;
-    height: 100vh;
-    overflow: hidden;
-    background: var(--gray-50);
-  }
+}
