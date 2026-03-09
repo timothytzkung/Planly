@@ -10,6 +10,7 @@ import { SFUCoursesPage } from "./views/test/SFUCoursesPage";
 
 import { LandingView } from "./views/LandingView";
 import { AuthView } from "./views/AuthView";
+import {DashboardView} from "./views/DashboardView";
 
 function App() {
   const [message, setMessage] = useState("");
@@ -41,7 +42,8 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            <Route path="/home" element={ <LandingView mounted={mounted}/> }/>
+            {/* <Route path="/home" element={ <LandingView mounted={mounted}/> }/> */}
+            <Route path="/home" element={ <DashboardView /> }/>
             <Route path="/login" element={ <AuthView />} />
 
             {/* Protected Routes */}
