@@ -1,8 +1,17 @@
 
 import styles from "./Dashboard.module.css"
+import { useEffect } from "react";
 
 // Dashboard view, props will contain data?
-export const Dashboard = (props) => {
+export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript, summary }) => {
+
+    // Destruct summary if exists
+    const { 
+        creditsCompleted, creditsInProgress, percentComplete, studentStatus
+    } = summary?.summary;
+
+    // Array of courses
+    const { timeline } = summary.timeline;
 
     const courses = [
         { name: "MACM 100", credits: 3, tag: "SIAT", accent: `${styles.siatBlue}` },
@@ -17,14 +26,19 @@ export const Dashboard = (props) => {
         { label: "Breadth", done: 12, req: 18, fillClass: "yellow" },
     ];
 
+    useEffect(() => {
+        console.log("DashCompon Summary: ", summary)
+        console.log("DashComp, creds: ", creditsCompleted ?? 0)
+    }, [summary])
+
 
     return (
         <div className={styles.container}>
             {/* Header */}
             <div className={styles.header}>
-                <h1 className={styles.yearTitle}>Year 2</h1>
+                <h1 className={styles.yearTitle}>{studentStatus}</h1>
                 <div className={styles.headerProgress}>
-                    <span>19 of 120 credits completed</span>
+                    <span>{creditsCompleted ?? 0} of 120 credits completed</span>
                     <div className={styles.miniBar}><div className={styles.miniBarFill} /></div>
                 </div>
             </div>
@@ -32,7 +46,20 @@ export const Dashboard = (props) => {
             <p className={styles.subtitle}>Fall 2025 | SIAT Major | BSc</p>
 
             <div className={styles.btnRow}>
-                <button className={styles.btnOutline}>Upload Transcript</button>
+                <form onSubmit={uploadTranscript}>
+                    <label htmlFor="fileUpload" className={styles.btnOutline}>
+                        Upload Transcript
+                    </label>
+                    <input
+                    style={{display: "none"}}
+                        type="file"
+                        id="fileUpload"
+                        accept="application/pdf"
+                        onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                    />
+                    <button
+                    className={styles.btnPrimary}>Submit & Analyze</button>
+                </form>
                 <button className={styles.btnPrimary}>Plan Semester →</button>
             </div>
 
@@ -46,8 +73,8 @@ export const Dashboard = (props) => {
                     <div className={styles.degreeProgressFill} />
                 </div>
                 <div className={styles.degreeStats}>
-                    <span>19 credits completed</span>
-                    <span>101 credits remaining</span>
+                    <span>{creditsCompleted ?? 0}  credits completed</span>
+                    <span>{120 - (creditsCompleted?? 0) } credits remaining</span>
                 </div>
             </div>
 
@@ -55,7 +82,7 @@ export const Dashboard = (props) => {
             <div className={styles.statsGrid}>
                 <div className={styles.statCard}>
                     <div className={styles.statLabel}>Credits Earned</div>
-                    <div className={`${styles.statValue} ${styles.statCredits}`}>19<span className={styles.denom}>/120</span></div>
+                    <div className={`${styles.statValue} ${styles.statCredits}`}>{creditsCompleted}<span className={styles.denom}>/120</span></div>
                 </div>
                 <div className={styles.statCard}>
                     <div className={styles.statLabel}>Courses Completed</div>
@@ -63,7 +90,7 @@ export const Dashboard = (props) => {
                 </div>
                 <div className={styles.statCard}>
                     <div className={styles.statLabel}>Degree Progress</div>
-                    <div className={`${styles.statValue} ${styles.statProgress}`}>16%</div>
+                    <div className={`${styles.statValue} ${styles.statProgress}`}>{percentComplete}%</div>
                 </div>
                 <div className={styles.statCard}>
                     <div className={styles.statLabel}>Current Semester</div>

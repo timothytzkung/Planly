@@ -24,8 +24,8 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            {/* <Route path="/home" element={ <LandingView mounted={mounted}/> }/> */}
-            <Route path="/home" element={ <DashboardView /> }/>
+            <Route path="/home" element={ <LandingView mounted={mounted}/> }/>
+            
             <Route path="/login" element={ <AuthView />} />
 
             {/* Protected Routes */}
@@ -33,8 +33,9 @@ function App() {
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <PdfUploadPage />
-                  <SFUCoursesPage />
+                  <DashboardView />
+                  {/* <PdfUploadPage />
+                  <SFUCoursesPage /> */}
                 </ProtectedRoute>
               } 
             />

@@ -11,6 +11,7 @@ import styles from "./DashboardView.module.css"
 
 export const DashboardView = () => {
 
+
     const [file, setFile] = useState(null);
     const [fileIsUploaded, setFileIsUploaded] = useState(false);
     const [reqSummary, setReqSummary] = useState(null);
@@ -166,11 +167,27 @@ export const DashboardView = () => {
         }
 
     }, [transcript, loading, fileIsUploaded, file])
-
-    return(
+    return (
         <div className={styles.layout}>
             <Sidebar />
-            <Dashboard />
+            <Dashboard 
+                uploadTranscript={handleUpload} 
+                setFile={setFile} 
+                setTranscript={setTranscript}
+                transcript={transcript}
+                summary={reqSummary}
+            />
+            
+            {/* {err && (
+        <div style={{ marginTop: 16, color: "crimson" }}>
+          <b>Error:</b> {err}
+        </div>
+      )}
+            {transcript && (
+        <pre style={{ marginTop: 16, padding: 12, overflowX: "auto" }}>
+          {JSON.stringify(transcript, null, 2)}
+        </pre>
+      )} */}
         </div>
 
     )
