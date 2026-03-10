@@ -11,6 +11,7 @@ export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript
     const [lowerDivision, setLowerDivision] = useState(0);
     const [upperDivision, setUpperDivision] = useState(0);
     const [totalBreadth, setTotalBreadth] = useState(0);
+    const [gpa, setGpa] = useState(0);
     const [gaps, setGaps] = useState([]);
     
     // Destruct summary if exists
@@ -60,6 +61,7 @@ export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript
 
     }
 
+    // Terms
     const fetchLatestTerm = () => {
         const _terms = summary?.timeline || {}
 
@@ -80,6 +82,13 @@ export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript
         return _courses.courses; // returns array of courses
     }
 
+    const fetchGPA = () => {
+        const _gpa = summary?.gpa.overall.gpa;
+        if(!_gpa) return 0;
+
+        return _gpa;
+    }
+
     useEffect(() => {
         // Get current term
         if (summary) {
@@ -96,6 +105,8 @@ export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript
                 { label: "Breadth", done: totalBreadth, req: 18, fillClass: "yellow" },
                 ]
             )
+            let _gpa = fetchGPA();
+            setGpa(_gpa);
         }
         if (currentTerm && summary) {
             let res = fetchLatestCourses();
@@ -168,12 +179,12 @@ export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript
                     <div className={`${styles.statValue} ${styles.statCredits}`}>{creditsCompleted ?? 0}<span className={styles.denom}>/120</span></div>
                 </div>
                 <div className={styles.statCard}>
-                    <div className={styles.statLabel}>Courses Completed</div>
-                    <div className={`${styles.statValue} ${styles.statCourses}`}>6<span className={styles.denom}>/40</span></div>
+                    <div className={styles.statLabel}>CGPA</div>
+                    <div className={`${styles.statValue} ${styles.statCourses}`}>{gpa ?? 0}<span className={styles.denom}>/4.33</span></div>
                 </div>
                 <div className={styles.statCard}>
                     <div className={styles.statLabel}>Degree Progress</div>
-                    <div className={`${styles.statValue} ${styles.statProgress}`}>{percentComplete}%</div>
+                    <div className={`${styles.statValue} ${styles.statProgress}`}>{percentComplete ?? 0}%</div>
                 </div>
                 <div className={styles.statCard}>
                     <div className={styles.statLabel}>Current Semester</div>

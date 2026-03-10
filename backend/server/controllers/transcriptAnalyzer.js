@@ -1,4 +1,3 @@
-
 // Analyzes transcripts; hard coded for IAT BSc
 /*
 TODO;
@@ -8,12 +7,12 @@ Change breadth requirements to fetch from SFU API
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
-// Course Model
-const WQBCourse = require("../models/wqbCourse")
-
+// Course Models
+const WQBCourse = require("../models/wqbCourse");
+const Summary = require("../models/Summary"); // <-- Imported the Summary Schema
 
 // Main runner function
-export const transcriptAnalyzer = async(transcriptData) => {
+export const transcriptAnalyzer = async(transcriptData, owner) => {
     const courses = parseTranscriptData(transcriptData);
 
     // Calculate GPAs
@@ -22,14 +21,18 @@ export const transcriptAnalyzer = async(transcriptData) => {
     // Check requirements
     const requirementChecks = await checkAllRequirements(courses);
 
-    // Generate comprehensive report
-    return {
+    // Generate comprehensive report data
+    const rawSummaryData = {
+        owner: owner.id,
         summary: generateSummary(courses, gpaResults, requirementChecks),
         gpa: gpaResults,
         requirements: requirementChecks,
         recommendations: generateRecommendations(requirementChecks, courses),
         timeline: generateTimeline(courses)
     };
+
+    // Instantiate and save the Mongoose document 
+    return rawSummaryData;
 };
 
 /**
@@ -408,7 +411,6 @@ const checkWQB = async (completed, inProgress) => {
     });
 
     const breadthCourses = [...bSci, ...bSoc, ...bHum, ...qCourses, ...wCourses];
-    console.log(breadthCourses)
 
     return {
         writing: {
@@ -492,12 +494,13 @@ const checkWQB = async (completed, inProgress) => {
                     bSci.reduce((sum, c) => sum + c.credits, 0) -
                     bSoc.reduce((sum, c) => sum + c.credits, 0) -
                     bHum.reduce((sum, c) => sum + c.credits, 0),
-                isMet: true,
+                isMet: true, // hard coded isMet for additional lmfao
                 courses: breadthCourses
                     .filter(c =>
                         !bSci.includes(c) &&
                         !bSoc.includes(c) &&
-                        !bHum.includes(c)
+                        !bHum.includes(c) &&
+                        !c.courseCode.includes("IAT")
                     )
                     .map(c => ({
                         code: c.courseCode,
@@ -617,16 +620,15 @@ const estimateGraduation = (creditsRemaining) => {
     const termsNeeded = Math.ceil(creditsRemaining / 12); // Assuming 12 credits/term
     const currentDate = new Date();
 
-    // Calculate terms ahead
+    // Determine current season index and year dynamically
     const seasons = ['Spring', 'Summer', 'Fall'];
     let year = currentDate.getFullYear();
-
-    // TODO
-    /*
-    Add checks for what season/term is it depending on date
-    */
-
-    let seasonIndex = 2; // Starting from Spring 2026
+    const month = currentDate.getMonth(); // 0-indexed (Jan = 0)
+    
+    let seasonIndex;
+    if (month >= 0 && month <= 3) seasonIndex = 0;      // Jan - Apr
+    else if (month >= 4 && month <= 7) seasonIndex = 1; // May - Aug
+    else seasonIndex = 2;                               // Sep - Dec
 
     for (let i = 0; i < termsNeeded; i++) {
         seasonIndex++;
@@ -651,7 +653,8 @@ const generateRecommendations = (requirements, courses) => {
             priority: 'high',
             category: 'Required Courses',
             message: `Complete missing lower division required courses: ${requirements.lowerDivisionRequired.missing.join(', ')}`,
-            courses: requirements.lowerDivisionRequired.missing
+            // Changed key to match schema structure
+            remaining: requirements.lowerDivisionRequired.missing 
         });
     }
 
