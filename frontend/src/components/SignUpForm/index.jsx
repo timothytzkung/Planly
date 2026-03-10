@@ -19,6 +19,7 @@ export const SignUpForm = () => {
     const BACK_PORT = 5050;
     const navigate = useNavigate();
 
+    // Handle submit to backend
     const handleSubmit = async(e) => {
         if (canSubmit) {
             e.preventDefault()
@@ -40,12 +41,12 @@ export const SignUpForm = () => {
                 }
             } catch (err) {
                 console.log(err);
-                setSubmitted(false);
             }
 
         };
     };
 
+    // Only render if submit successful
     if (submitted) {
         return (
             <div className={styles.successContainer}>
