@@ -5,6 +5,14 @@ import { AuthContext } from "../../context/AuthContext";
 
 // Dashboard view, props will contain data?
 export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript, summary }) => {
+    // current courses stash
+    const [currentTerm, setCurrentTerm] = useState("");
+    const [currentCourses, setCurrentCourses] = useState(null);
+    const [lowerDivision, setLowerDivision] = useState(0);
+    const [upperDivision, setUpperDivision] = useState(0);
+    const [totalBreadth, setTotalBreadth] = useState(0);
+    const [gaps, setGaps] = useState([]);
+    
     // Destruct summary if exists
     const { 
         creditsCompleted, creditsInProgress, percentComplete, studentStatus
@@ -16,22 +24,85 @@ export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript
       // Destructure to use contexts
     const { token, user, logout } = useContext(AuthContext);
 
-    const courses = [
-        { name: "MACM 100", credits: 3, tag: "SIAT", accent: `${styles.siatBlue}` },
-        { name: "IAT 206W", credits: 3, tag: "SIAT", accent: `${styles.siatBlue}` },
-        { name: "IAT 235", credits: 3, tag: "SIAT", accent: `${styles.siatOrange}` },
-        { name: "ARCH 131", credits: 3, tag: "BREADTH", accent: `${styles.breadth}` },
-    ];
 
-    const gaps = [
-        { label: "Lower Division", done: 12, req: 30, fillClass: "green" },
-        { label: "Upper Division", done: 3, req: 60, fillClass: "blue" },
-        { label: "Breadth", done: 12, req: 18, fillClass: "yellow" },
-    ];
+    // const gaps = [
+    //     { label: "Lower Division", done: 12, req: 30, fillClass: "green" },
+    //     { label: "Upper Division", done: 3, req: 60, fillClass: "blue" },
+    //     { label: "Breadth", done: 12, req: 18, fillClass: "yellow" },
+    // ];
+
+    // Helper func 
+    const clamp = (val, min, max) => Math.min(Math.max(val, min), max)
+
+    const fetchGaps = () => {
+        // Currently fetching for sci
+        const { 
+            lowerDivisionElectives, lowerDivisionRequired, upperDivisionRequired,
+            upperDivisionScience, wqb
+        } = summary?.requirements || {}
+
+        const {breadth, quantitative, writing} = wqb;
+        const {additional, humanities, science, socialScience} = breadth;
+
+        let _breadth = additional?.completed + humanities?.completed + science?.completed + socialScience?.completed;
+        let _quant = quantitative?.completed;
+        let _writing = writing?.completed;
+
+        // Breadth
+        setTotalBreadth(_breadth + _quant + _writing);
+
+        // Core courses
+        const totalLowerCompleted = lowerDivisionElectives?.creditsCompleted + lowerDivisionRequired?.creditsCompleted;
+        const totalUpperCompleted = upperDivisionRequired?.creditsCompleted + upperDivisionScience?.creditsCompleted;
+
+        setLowerDivision(totalLowerCompleted);
+        setUpperDivision(totalUpperCompleted);
+
+    }
+
+    const fetchLatestTerm = () => {
+        const _terms = summary?.timeline || {}
+
+        // Null check
+        if (!_terms) return {"2025 Fall": {}}; // dummy fallback
+
+        // Returns last key in courses (will always be sorted)
+        return Object.keys(_terms)[Object.keys(_terms).length - 1];
+    }
+
+    const fetchLatestCourses = () => {
+        // Get courses from latest term
+        const _courses = summary?.timeline[currentTerm] || {};
+        
+        // Null check
+        if (!_courses) return {}
+
+        return _courses.courses; // returns array of courses
+    }
 
     useEffect(() => {
+        // Get current term
+        if (summary) {
+            let res = fetchLatestTerm();
+            setCurrentTerm(res);
+            console.log("Current term is: ", currentTerm);
+
+            // Fetch gaps
+            fetchGaps()
+            setGaps(
+                [
+                { label: "Lower Division", done: lowerDivision || 0, req: 30, fillClass: "green" },
+                { label: "Upper Division", done: upperDivision || 0, req: 44, fillClass: "blue" },
+                { label: "Breadth", done: totalBreadth, req: 18, fillClass: "yellow" },
+                ]
+            )
+        }
+        if (currentTerm && summary) {
+            let res = fetchLatestCourses();
+            setCurrentCourses(res);
+        }
         
-    }, [summary])
+    }, [summary, currentTerm])
 
 
     return (
@@ -45,14 +116,14 @@ export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript
                         <div 
                         className={styles.miniBarFill} 
                         style={{
-                            width: `${creditsCompleted/120 * 100}%`
+                            width: `${clamp(creditsCompleted/120 * 100, 0, 100)}%`
                         }}
                         />
                     </div>
                 </div>
             </div>
 
-            <p className={styles.subtitle}>Fall 2025 | SIAT Major | BSc</p>
+            <p className={styles.subtitle}>{currentTerm || "2025 Fall"} | SIAT Major | BSc</p>
 
             <div className={styles.btnRow}>
                 <form onSubmit={uploadTranscript}>
@@ -81,7 +152,7 @@ export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript
                 <div className={styles.degreeProgressBar}>
                     <div className={styles.degreeProgressFill} 
                     style={{
-                            width: `${creditsCompleted/120 * 100}%`
+                            width: `${clamp(creditsCompleted/120 * 100, 0, 100)}%`
                         }}/>
                 </div>
                 <div className={styles.degreeStats}>
@@ -108,9 +179,14 @@ export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript
                     <div className={styles.statLabel}>Current Semester</div>
                     <div className={styles.termContainer}>
                         <div className={`${styles.statValue} ${styles.statSemester}`}>
-                            Fall
+                        { currentTerm ?
+                        (currentTerm.split(" ")[1] || "N/D") : "N/D"
+                        }
                         </div>
-                        <span className={styles.statSemesterYear}>2026</span>
+                        <span className={styles.statSemesterYear}>
+                            { currentTerm ?
+                        (currentTerm.split(" ")[0] || "") : ""
+                        }</span>
                     </div>
 
 
@@ -124,7 +200,7 @@ export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript
                     <a className={styles.viewLink} style={{ color: "#c8102e" }}>View Planner →</a>
                 </div>
                 <div className={styles.coursesGrid}>
-                    {courses.map((c) => (
+                    {currentCourses?.map((c) => (
                         <div key={c.name} className={`${styles.courseCard} ${c.accent}`}>
                             <div className={styles.courseTop}>
                                 <span
@@ -137,6 +213,7 @@ export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript
                                 </span>
                                 <span className={styles.courseCredits}>{c.credits}cr</span>
                             </div>
+                            <div className={styles.courseName}>{c.code}</div>
                             <div className={styles.courseName}>{c.name}</div>
                         </div>
                     ))}
