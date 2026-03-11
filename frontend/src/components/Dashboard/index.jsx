@@ -4,7 +4,7 @@ import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 
 // Dashboard view, props will contain data?
-export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript, summary }) => {
+export const Dashboard = ({ uploadTranscript, setFile, file, setTranscript, transcript, summary, _error}) => {
     // current courses stash
     const [currentTerm, setCurrentTerm] = useState("");
     const [currentCourses, setCurrentCourses] = useState(null);
@@ -94,7 +94,6 @@ export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript
         if (summary) {
             let res = fetchLatestTerm();
             setCurrentTerm(res);
-            console.log("Current term is: ", currentTerm);
 
             // Fetch gaps
             fetchGaps()
@@ -135,8 +134,14 @@ export const Dashboard = ({ uploadTranscript, setFile, setTranscript, transcript
             </div>
 
             <p className={styles.subtitle}>{currentTerm || "2025 Fall"} | SIAT Major | BSc</p>
-
+            {file &&
+                <div className={styles.fileTextContainer}>File Uploaded: {file.name}</div>
+            }
+            {_error &&
+            <div>{_error}</div>
+            }
             <div className={styles.btnRow}>
+                
                 <form onSubmit={uploadTranscript}>
                     <label htmlFor="fileUpload" className={styles.btnOutline}>
                         Upload Transcript
