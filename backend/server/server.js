@@ -125,14 +125,11 @@ app.post("/api/check-requirements", async (req, res) => {
 app.post("/api/summary/", async(req, res) => {
   if (!req.body) return res.status(400).json({ error: "No body attached" });
 
-  console.log(req.body.data);
+  // console.log(req.body.data);
 
 
   try {
-    // Replace transcript if one already exists
-    const exists = await Summary.findOneAndDelete({
-      owner: req.body.data.id
-  })
+
     // Look for transcript via userid
     const summary = await Summary.findOne({ owner: req.body.data.id });
 
