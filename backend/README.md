@@ -11,6 +11,8 @@ Current documentation for backend.
 6. Create a `.env` file INSIDE the server folder (important!!)
 7. Paste the following inside `.env` and replace the `<>` tags with respective elements:<br/>
 `MONGO_WQB_URI=mongodb+srv://<user_name>:<password>@cluster0.xsec5jy.mongodb.net/wqb?appName=Cluster0`
+8. Paste the following inside `.env` and replace the `WHATEVER` text with whatever you want: <br/>
+`JWT_SECRET=WHATEVER`
 
 ## Troubleshooting
 If you're running into any errors, check the following:
