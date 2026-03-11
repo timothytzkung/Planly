@@ -11,7 +11,7 @@ import styles from "./DashboardView.module.css"
 
 export const DashboardView = () => {
 
-
+    // Handlers for file states
     const [file, setFile] = useState(null);
     const [fileIsUploaded, setFileIsUploaded] = useState(false);
     const [reqSummary, setReqSummary] = useState(null);
@@ -24,10 +24,54 @@ export const DashboardView = () => {
     const navigate = useNavigate();
 
     // Destructure to use contexts
-    const { token, user, logout } = useContext(AuthContext);
+    const { token, user, logout, updateUser } = useContext(AuthContext);
 
     // Server 
     const BACK_PORT = 5050;
+
+    // fetch summaries
+    const fetchSummary = async() => {
+        console.log("User is: ", user);
+        try {
+            const res = await fetch(`http://localhost:${BACK_PORT}/api/summary/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type":  "application/json"
+                },
+                body: JSON.stringify({data: user})
+            });
+            if (res.ok) {
+                const result = await res.json();
+                return result;
+            }
+        } catch (e) {
+            console.log("Error fetching summary: ", e);
+        }
+    }
+
+    // fetch the transcript
+    const fetchTranscript = async() => {
+        try {
+            console.log(user)
+            console.log(token)
+            const res = await fetch(`http://localhost:${BACK_PORT}/api/transcript/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: token,
+                },
+                body: JSON.stringify({ userId: user.id })
+            });
+            if (res.ok) {
+                const result = await res.json();
+                console.log(result)
+                return result //structure is {_id, owner, transcript:array}
+            }
+        } catch(e) {
+            console.log("Error fetching transcript: ", e);
+            return -1;
+        }
+    }
 
     // Count credits
     const countTotalCredits = (data) => {
@@ -43,9 +87,8 @@ export const DashboardView = () => {
         return totalCredits;
     }
 
-    const saveToDB = async (e) => {
-        e.preventDefault();
-        if (transcript) {
+    const saveToDB = async (parsedTranscript) => {
+        if (parsedTranscript) {
             try {
                 const res = await fetch(`http://localhost:${BACK_PORT}/api/transcript/upload`, {
                     method: "POST",
@@ -53,23 +96,25 @@ export const DashboardView = () => {
                         "Content-Type": "application/json",
                         Authorization: token,
                     },
-                    body: JSON.stringify({ data: transcript })
-                })
+                    body: JSON.stringify({ data: parsedTranscript })
+                });
+    
                 if (res.ok) {
                     const result = await res.json();
-                    alert("Your Transcript has been saved!")
+                    console.log("Transcript saved!")
+                    // alert("Your Transcript has been saved!");
                     console.log(result);
                 } else {
                     const errData = await res.json();
-                    alert(errData || "Failed to add transcript");
+                    // alert(errData.message || "Failed to add transcript");
                 }
             } catch (e) {
                 console.log("Submission error: ", e);
             }
         } else {
-            alert("Please upload a transcript first!")
+            alert("Please upload a transcript first!");
         }
-    }
+    };
 
     const deleteFromDB = async () => {
         // Searches for transcript by owner id
@@ -94,7 +139,7 @@ export const DashboardView = () => {
     async function handleUpload(e) {
         e.preventDefault();
         setErr("");
-
+    
         if (!file) {
             setErr("Please choose a PDF first.");
             return;
@@ -103,29 +148,32 @@ export const DashboardView = () => {
             setErr("Only PDF files are allowed.");
             return;
         }
-        // Format data
+    
         const formData = new FormData();
         formData.append("pdf", file);
-
-        // Loading
-        setLoading(true)
-
-        // Fetch
-        const response = await fetch(`http://localhost:${BACK_PORT}/api/parse`, {
-            method: "POST",
-            body: formData,
-        }).catch((error) => setErr(error));
-
-        const data = await response.json();
-        const parsed = JSON.parse(data.transcript)
-
-        // Set transcript data
-        setTranscript(parsed);
-        setFileIsUploaded(true);
-
-        // End load
-        setLoading(false)
+    
+        setLoading(true);
+    
+        try {
+            const response = await fetch(`http://localhost:${BACK_PORT}/api/parse`, {
+                method: "POST",
+                body: formData,
+            });
+    
+            const data = await response.json();
+            const parsed = JSON.parse(data.transcript);
+    
+            setTranscript(parsed);
+            setFileIsUploaded(true);
+    
+            await saveToDB(parsed);
+        } catch (error) {
+            setErr(error.message || "Upload failed");
+        } finally {
+            setLoading(false);
+        }
     }
+    
 
     const checkRequirements = async (_degreeType) => {
         console.log("calling backend for checkreqs")
@@ -138,7 +186,8 @@ export const DashboardView = () => {
             },
             body: JSON.stringify({
                 transcriptData: transcript,
-                degreeType: _degreeType
+                degreeType: _degreeType,
+                owner: user
             })
         }).catch((error) => setErr(error));
 
@@ -149,6 +198,22 @@ export const DashboardView = () => {
 
     // Trigger on finished pdf upload
     useEffect(() => {
+        if (!transcript) {
+            // const handleFetchTranscript = async() => {
+            //     const result = await fetchTranscript();
+            //     console.log(result);
+            //     setTranscript(result);
+            // }
+            // handleFetchTranscript();
+        }
+        if (!reqSummary && user) {
+            const handleFetchSummary = async() => {
+                const result = await fetchSummary();
+                console.log(result);
+                setReqSummary(result);
+            }
+            handleFetchSummary();
+        }
 
         if (transcript) {
             const count = countTotalCredits(transcript);

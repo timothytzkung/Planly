@@ -112,7 +112,7 @@ export const Sidebar = () => {
           </ul>
           
         </div>
-        <SecondaryButton label={"Logout"}/>
+        <SecondaryButton label={"Logout"} onClick={logout}/>
 
         {/* Logo */}
         <div className={styles.logo}>

@@ -114,7 +114,7 @@ __________________________________
 __________________________________
 
 ## Transcript Routes<br/>
-### `GET /api/transcript/`<br/>
+### `POST /api/transcript/`<br/>
 **Query Parameters**<br/>
 - `token` JSON
 - `userId` string

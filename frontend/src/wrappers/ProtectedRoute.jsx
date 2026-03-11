@@ -12,7 +12,7 @@ function ProtectedRoute({ children }) {
   if (!token) {
     // immediately bounce them back to the login page
     // <Navigate /> renders a redirect instantly without the user doing anything
-    return <Navigate to="/home" />;
+    return <Navigate to="/" />;
   }
 
   // access Granted

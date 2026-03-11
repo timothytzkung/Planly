@@ -9,6 +9,7 @@ import { SFUCoursesPage } from "./views/test/SFUCoursesPage";
 import { LandingView } from "./views/LandingView";
 import { AuthView } from "./views/AuthView";
 import {DashboardView} from "./views/DashboardView";
+import { CourseCatalogueView } from "./views/CourseCatalogueView";
 
 function App() {
   const [mounted, setMounted] = useState(false);
@@ -24,7 +25,7 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            <Route path="/home" element={ <LandingView mounted={mounted}/> }/>
+            <Route path="/" element={ <LandingView mounted={mounted}/> }/>
             
             <Route path="/login" element={ <AuthView />} />
 
@@ -34,8 +35,16 @@ function App() {
               element={
                 <ProtectedRoute>
                   <DashboardView />
-                  {/* <PdfUploadPage />
-                  <SFUCoursesPage /> */}
+                </ProtectedRoute>
+              } 
+            />
+            <Route
+              path="devdash"
+              element={
+                <ProtectedRoute>
+                  <CourseCatalogueView />
+                  <PdfUploadPage />
+                  <SFUCoursesPage />
                 </ProtectedRoute>
               } 
             />
