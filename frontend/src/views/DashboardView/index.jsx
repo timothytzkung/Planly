@@ -31,7 +31,6 @@ export const DashboardView = () => {
 
     // fetch summaries
     const fetchSummary = async() => {
-        console.log("User is: ", user);
         try {
             const res = await fetch(`http://localhost:${BACK_PORT}/api/summary/`, {
                 method: "POST",
@@ -52,8 +51,6 @@ export const DashboardView = () => {
     // fetch the transcript
     const fetchTranscript = async() => {
         try {
-            console.log(user)
-            console.log(token)
             const res = await fetch(`http://localhost:${BACK_PORT}/api/transcript/`, {
                 method: "POST",
                 headers: {
@@ -64,7 +61,6 @@ export const DashboardView = () => {
             });
             if (res.ok) {
                 const result = await res.json();
-                console.log(result)
                 return result //structure is {_id, owner, transcript:array}
             }
         } catch(e) {
@@ -102,8 +98,6 @@ export const DashboardView = () => {
                 if (res.ok) {
                     const result = await res.json();
                     console.log("Transcript saved!")
-                    // alert("Your Transcript has been saved!");
-                    console.log(result);
                 } else {
                     const errData = await res.json();
                     // alert(errData.message || "Failed to add transcript");
@@ -112,7 +106,7 @@ export const DashboardView = () => {
                 console.log("Submission error: ", e);
             }
         } else {
-            alert("Please upload a transcript first!");
+            setErr("Please upload a transcript first!")
         }
     };
 
@@ -209,7 +203,6 @@ export const DashboardView = () => {
         if (!reqSummary && user) {
             const handleFetchSummary = async() => {
                 const result = await fetchSummary();
-                console.log(result);
                 setReqSummary(result);
             }
             handleFetchSummary();
@@ -222,12 +215,10 @@ export const DashboardView = () => {
 
         const handleRequirements = async () => {
             const result = await checkRequirements("BSc");
-            console.log(result);
             setReqSummary(result);
         }
         if (fileIsUploaded) {
             handleRequirements();
-            console.log(reqSummary)
             setFileIsUploaded(false); // debounce
         }
 
@@ -238,9 +229,11 @@ export const DashboardView = () => {
             <Dashboard 
                 uploadTranscript={handleUpload} 
                 setFile={setFile} 
+                file={file}
                 setTranscript={setTranscript}
                 transcript={transcript}
                 summary={reqSummary}
+                _error={err}
             />
             
             {/* {err && (

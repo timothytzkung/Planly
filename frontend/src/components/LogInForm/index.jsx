@@ -9,11 +9,11 @@ import { useNavigate } from "react-router-dom";
 export const LogInForm = () => {
 
     // States for form handling
-    const [formData, setFormData] = useState( {email: "", password: ""} );
+    const [formData, setFormData] = useState({ email: "", password: "" });
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState("");
 
-    const update = (field) => (e) => setFormData({...formData, [field]:e.target.value});
+    const update = (field) => (e) => setFormData({ ...formData, [field]: e.target.value });
     const canSubmit = formData.email && formData.password;
 
     const BACK_PORT = 5050;
@@ -28,9 +28,9 @@ export const LogInForm = () => {
         if (token) {
             navigate("/dashboard")
         }
-    },[token, navigate, formData])
+    }, [token, navigate, formData])
 
-    const handleSubmit = async(e) => {
+    const handleSubmit = async (e) => {
         // Pass error
         e.preventDefault();
         setError("");
@@ -40,7 +40,7 @@ export const LogInForm = () => {
             try {
                 const response = await fetch(`http://localhost:${BACK_PORT}/api/auth/login`, {
                     method: "POST",
-                    headers: {"Content-Type": "application/json"},
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(formData)
                 });
                 // Await data from backend
@@ -52,15 +52,21 @@ export const LogInForm = () => {
                     navigate("/dashboard");
                 } else {
                     setError(data.message || "Invalid Credentials")
-                } 
-            } catch(err) {
+                }
+            } catch (err) {
                 setError("Server error. Please try again later.");
             }
         }
     }
 
-    return(
+    return (
         <>
+            {error &&
+                <div className={styles.errorContainer}>
+                    <span className={styles.error}>{error}</span>
+                </div>
+
+            }
             <InputField label="Email" type="email" placeholder="asdf@sfu.ca" value={formData.email} onChange={update("email")} autoComplete="email" />
             <InputField label="Password" type="password" placeholder="••••••••••••" value={formData.password} onChange={update("password")} autoComplete="current-password" />
             <div className={styles.textContainer}>
@@ -68,7 +74,7 @@ export const LogInForm = () => {
                     Forgot Password?
                 </span>
             </div>
-            <PrimaryButton label={"Log In →"} disabled={!canSubmit} onClick={handleSubmit}/>
+            <PrimaryButton label={"Log In →"} disabled={!canSubmit} onClick={handleSubmit} />
 
         </>
     )
