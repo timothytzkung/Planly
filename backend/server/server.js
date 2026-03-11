@@ -124,12 +124,7 @@ app.post("/api/check-requirements", async (req, res) => {
 // Fetch summary
 app.post("/api/summary/", async(req, res) => {
   if (!req.body) return res.status(400).json({ error: "No body attached" });
-
-  // console.log(req.body.data);
-
-
   try {
-
     // Look for transcript via userid
     const summary = await Summary.findOne({ owner: req.body.data.id });
 

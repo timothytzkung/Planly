@@ -5,11 +5,13 @@ import ProtectedRoute from "./wrappers/ProtectedRoute";
 
 import { PdfUploadPage } from "./views/test/PdfUploadPage";
 import { SFUCoursesPage } from "./views/test/SFUCoursesPage";
+import { TestCataloguePage } from "./views/test/TestCataloguePage";
 
 import { LandingView } from "./views/LandingView";
 import { AuthView } from "./views/AuthView";
 import {DashboardView} from "./views/DashboardView";
 import { CourseCatalogueView } from "./views/CourseCatalogueView";
+
 
 function App() {
   const [mounted, setMounted] = useState(false);
@@ -43,10 +45,19 @@ function App() {
               element={
                 <ProtectedRoute>
                   <CourseCatalogueView />
+                  <TestCataloguePage />
                   <PdfUploadPage />
                   <SFUCoursesPage />
                 </ProtectedRoute>
               } 
+            />
+            <Route 
+              path="course-catalogue"
+              element={
+                <ProtectedRoute>
+                  <CourseCatalogueView />
+                </ProtectedRoute>
+            }
             />
           </Routes>
         </Router>
