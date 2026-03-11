@@ -1,4 +1,5 @@
 import { useState, useContext } from "react";
+import { useNavigate } from 'react-router-dom';
 import logo from "../../assets/logo.svg"
 
 // Import styles
@@ -56,8 +57,8 @@ const TranscriptIcon = () => (
 );
 
 const navItems = [
-  { id: "home", label: "Home", icon: <HomeIcon /> },
-  { id: "catalogue", label: "Course Catalogue", icon: <CatalogueIcon /> },
+  { id: "dashboard", label: "Home", icon: <HomeIcon /> },
+  { id: "course-catalogue", label: "Course Catalogue", icon: <CatalogueIcon /> },
   { id: "degree", label: "Degree", icon: <DegreeIcon /> },
   { id: "planner", label: "Planner", icon: <PlannerIcon /> },
   { id: "transcript", label: "Transcript", icon: <TranscriptIcon /> },
@@ -69,6 +70,8 @@ export const Sidebar = () => {
   const [active, setActive] = useState("home");
   // Destructure to use contexts
   const { token, user, logout } = useContext(AuthContext);
+
+  const navigate = useNavigate();
 
   return (
     <>
@@ -90,7 +93,10 @@ export const Sidebar = () => {
             <button
               key={item.id}
               className={`${styles.navItem} ${active === item.id ? styles.active : ""}`}
-              onClick={() => setActive(item.id)}
+              onClick={() => {
+                setActive(item.id)
+                navigate(`/${item.id}`);
+              }}
             >
               {item.icon}
               {item.label}
