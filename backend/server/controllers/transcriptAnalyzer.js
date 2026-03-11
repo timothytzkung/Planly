@@ -9,7 +9,6 @@ const require = createRequire(import.meta.url);
 
 // Course Models
 const WQBCourse = require("../models/wqbCourse");
-const Summary = require("../models/Summary"); // <-- Imported the Summary Schema
 
 // Main runner function
 export const transcriptAnalyzer = async(transcriptData, owner) => {
