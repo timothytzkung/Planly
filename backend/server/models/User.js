@@ -22,10 +22,6 @@ const UserSchema = new mongoose.Schema({
     },
     role: {
         type: String
-    },
-    transcriptData: { // Might add transcript schema for summary? idk
-        uploadDate: Date,
-        data: String //  Currently gonna just stringify the JSON
     }
 });
 
