@@ -1,0 +1,313 @@
+.container {
+    font-family: 'DM Sans', sans-serif;
+    background: #f5f5f7;
+    min-height: 100vh;
+    display: flex;
+}
+
+
+/* ── Main ── */
+.main {
+    margin-top: 3em;
+    margin-left: 220px;
+    margin-right: 110px;
+    flex: 1;
+    padding: 32px 40px;
+    max-width: calc(100% - 220px);
+    display: flex;
+    gap: 32px;
+}
+
+.content {
+    flex: 1;
+    min-width: 0;
+    margin-right: 8rem;
+}
+
+.pageTitle {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 14px;
+}
+
+.resultsBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.resultsText {
+    font-size: 14px;
+    color: #555;
+}
+
+.resultsText span {
+    color: #c8102e;
+    font-weight: 600;
+}
+
+.filterActive {
+    color: #c8102e;
+    font-weight: 600;
+}
+
+.sortBar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #666;
+}
+
+.sortSelect {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-family: inherit;
+    font-size: 13px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.searchBox {
+    width: 100%;
+    padding: 11px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    color: #333;
+    background: #fff;
+    margin-bottom: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.searchBox:focus {
+    border-color: #c8102e;
+}
+
+/* ── Quick Filter Chips ── */
+.chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1.5px solid #ddd;
+    background: #fff;
+    color: #555;
+    transition: all 0.15s;
+}
+
+.chip:hover {
+    border-color: #c8102e;
+    color: #c8102e;
+}
+
+.chip.active {
+    background: #c8102e;
+    color: #fff;
+    border-color: #c8102e;
+}
+
+/* ── Course Card ── */
+.courseList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.courseCard {
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.2s;
+}
+
+.courseCard:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10);
+}
+
+.cardBadge {
+    width: 80px;
+    min-width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    background: #fde8ec;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #c8102e;
+    text-align: center;
+    line-height: 1.3;
+}
+
+.cardBody {
+    flex: 1;
+    min-width: 0;
+}
+
+.cardTitleRow {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.cardCode {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.cardName {
+    font-size: 15px;
+    font-weight: 500;
+    color: #333;
+}
+
+.cardPrereq {
+    padding-bottom: 1rem;
+    font-size: 12px;
+    color: #999;
+}
+
+.cardTags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+}
+
+.tag {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.tagCore {
+    background: #c8102e;
+    color: #fff;
+}
+
+.tagInperson {
+    background: #d4f3e3;
+    color: #1a7a4a;
+}
+
+.tagLevel {
+    background: #ebebeb;
+    color: #555;
+}
+
+.tagTerm {
+    background: #ebebeb;
+    color: #555;
+}
+
+.cardInstructor {
+    font-size: 12px;
+    color: #aaa;
+}
+
+.cardRight {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    min-width: 100px;
+}
+
+.cardCredits {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.btnPlan {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    transition: opacity 0.15s;
+}
+
+.btnPlan:hover {
+    opacity: 0.85;
+}
+
+.btnPlanPlanned {
+    background: #fff;
+    color: #1a1a1a;
+    border: 1.5px solid #ccc;
+}
+
+.btnPlanAdd {
+    background: #c8102e;
+    color: #fff;
+}
+
+/* ── Filters Sidebar ── */
+.filtersPanel {
+    width: 200px;
+    min-width: 200px;
+    flex-shrink: 0;
+}
+
+.filtersTitle {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 18px;
+}
+
+.filterGroup {
+    margin-bottom: 20px;
+}
+
+.filterGroup-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 10px;
+}
+
+.filterOption {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: #333;
+}
+
+.filterOption input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #c8102e;
+    cursor: pointer;
+}

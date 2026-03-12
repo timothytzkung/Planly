@@ -95,7 +95,7 @@ export const AuthView = ({ initialTab }) => {
                         className={styles.backHomeText}
                         onMouseEnter={e => e.currentTarget.style.color = "#cc1f36"}
                         onMouseLeave={e => e.currentTarget.style.color = "#555"}
-                        onClick={() => navigate("/home")}
+                        onClick={() => navigate("/")}
                     >
                         ← Back to home
                     </span>

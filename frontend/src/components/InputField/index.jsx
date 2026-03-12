@@ -14,6 +14,7 @@ export const InputField = ({ label, type = "text", placeholder, value, onChange,
                 type={type}
                 placeholder={placeholder}
                 onChange={onChange}
+                value={value}
                 autoComplete={autoComplete}
                 className={styles.input}
                 onFocus={e => {

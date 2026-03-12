@@ -133,15 +133,17 @@ export const PdfUploadPage = () => {
   const checkRequirements = async (_degreeType) => {
     console.log("calling backend for checkreqs")
     console.log(transcript);
+    console.log(token)
     const response = await fetch(`http://localhost:${BACK_PORT}/api/check-requirements`, {
       method: "POST",
       headers: {
-        "Accept": "application/json",
         "Content-Type": "application/json",
+        Authorization: token
       },
       body: JSON.stringify({
         transcriptData: transcript,
-        degreeType: _degreeType
+        degreeType: _degreeType,
+        owner: user
       })
     }).catch((error) => setErr(error));
 

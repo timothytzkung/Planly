@@ -14,7 +14,7 @@ function mapTranscriptData(data) {
 }
 
 // Fetches transcripts if one exists
-router.get("/", verifyToken, async (req, res) => {
+router.post("/", verifyToken, async (req, res) => {
     try {
         // Look for transcript via userid
       const transcript = await Transcript.findOne({ owner: req.userId });
