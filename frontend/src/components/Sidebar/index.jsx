@@ -84,8 +84,11 @@ export const Sidebar = () => {
           <div className={styles.profileInfo}>
             <h2 className={styles.profileInfoH2}>{user?.name || "Guest"}</h2>
             <span className={styles.profileInfoSpan}> SIAT Major | BSc</span>
+            <button className={styles.logoutBtn} onClick={logout}>Logout</button>
           </div>
+          
         </div>
+        
 
         {/* Navigation */}
         <nav className={styles.nav}>
@@ -118,7 +121,6 @@ export const Sidebar = () => {
           </ul>
           
         </div>
-        <SecondaryButton label={"Logout"} onClick={logout}/>
 
         {/* Logo */}
         <div className={styles.logo}>

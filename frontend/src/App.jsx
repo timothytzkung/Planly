@@ -12,6 +12,7 @@ import { AuthView } from "./views/AuthView";
 import {DashboardView} from "./views/DashboardView";
 import { CourseCatalogueView } from "./views/CourseCatalogueView";
 
+import { DegreePlanner } from "./components/DegreePlanner"
 
 function App() {
   const [mounted, setMounted] = useState(false);
@@ -44,8 +45,7 @@ function App() {
               path="devdash"
               element={
                 <ProtectedRoute>
-                  <CourseCatalogueView />
-                  <TestCataloguePage />
+                  <DegreePlanner />
                   <PdfUploadPage />
                   <SFUCoursesPage />
                 </ProtectedRoute>
