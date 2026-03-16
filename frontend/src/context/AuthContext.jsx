@@ -8,6 +8,7 @@ export function AuthProvider({ children }) {
   // initialize state directly from localStorage
   // this ensures that on page refresh, the 'token' is NOT null
   // prevents the ProtectedRoute from redirecting to Login
+  const [backport, setBackport] = useState(5050);
   const [token, setToken] = useState(localStorage.getItem("token") || null);
   const [user, setUser] = useState(() => {
     const savedToken = localStorage.getItem("token");
@@ -61,7 +62,7 @@ export function AuthProvider({ children }) {
     // we provide 'token' and 'user' (data)
     // and 'login' and 'logout' (functions) to the whole app
 
-    <AuthContext.Provider value={{ token, user, login, logout, updateUser }}>
+    <AuthContext.Provider value={{ token, user, login, logout, updateUser, backport }}>
       {children}
     </AuthContext.Provider>
   );

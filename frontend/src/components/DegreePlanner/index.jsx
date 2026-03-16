@@ -1,6 +1,6 @@
 
 import styles from "./DegreePlanner.module.css"
-
+import { useEffect, useState } from 'react';
 
 const LegendItem = ({ color, label, count, dotStyle = {} }) => {
     return (
@@ -26,9 +26,7 @@ const ProgressBar = ({ percent, color }) => {
     );
 };
 
-const OverallProgressCard = ({ completed, inProgress, remaining, total, COLORS }) => {
-    const credits = completed * 3 + inProgress * 3; // rough approx
-    const creditsDone = 19;
+const OverallProgressCard = ({ creditsDone, completed, inProgress, remaining, total, COLORS }) => {
     const pct = Math.round((creditsDone / total) * 100);
 
     return (
@@ -65,7 +63,7 @@ const Chip = ({ code, status }) => {
     const cls =
         status === "completed"
             ? `${styles.chip} ${styles.chipCompleted}`
-            : status === "inprogress"
+            : status === "in-progress"
                 ? `${styles.chip} ${styles.chipInprogress}`
                 : `${styles.chip} ${styles.chipRemaining}`;
 
@@ -106,18 +104,11 @@ const SectionCard = ({
 };
 
 
-export const DegreePlanner = () => {
-    const COLORS = {
-        completed: "#E24B4A",
-        inProgress: "#185FA5",
-        remaining: "transparent",
-        lowerDiv: "#E24B4A",
-        upperDiv: "#185FA5",
-        breadth: "#EF9F27",
-        bachelor: "#1D9E75",
-      };
-      // Temporary data
-    const LOWER_DIVISION = [
+export const DegreePlanner = ({ summary }) => {
+
+    const [courses, setCourses] = useState([]);
+
+    const [LOWER_DIVISION, SET_LOWER_DIVISION] = useState([
         { code: "IAT 100", status: "completed" },
         { code: "IAT 102", status: "completed" },
         { code: "IAT 103W", status: "completed" },
@@ -126,7 +117,7 @@ export const DegreePlanner = () => {
         { code: "IAT 167", status: "completed" },
         { code: "MATH 130", status: "completed" },
         { code: "MACM 101", status: "completed" },
-        { code: "IAT 206W", status: "inprogress" },
+        { code: "IAT 206W", status: "in-progress" },
         { code: "IAT 201", status: "remaining" },
         { code: "IAT 202", status: "remaining" },
         { code: "IAT 222", status: "remaining" },
@@ -134,21 +125,78 @@ export const DegreePlanner = () => {
         { code: "IAT 235", status: "remaining" },
         { code: "IAT 238", status: "remaining" },
         { code: "IAT 265", status: "remaining" },
-      ];
-       
-      const UPPER_DIVISION = [
-        { code: "IAT 339", status: "inprogress" },
-        { code: "IAT 359", status: "inprogress" },
-        { code: "IAT 459", status: "remaining" },
+    ]);
+
+    const [UPPER_DIVISION, SET_UPPER_DIVISION] = useState([
         { code: "IAT 333", status: "remaining" },
-        { code: "IAT 431", status: "remaining" },
-        { code: "IAT 438", status: "remaining" },
-        { code: "IAT 334", status: "remaining" },
+        { code: "IAT 336", status: "remaining" },
+        { code: "IAT 339", status: "remaining" },
         { code: "IAT 351", status: "remaining" },
+        { code: "IAT 355", status: "remaining" },
+        { code: "IAT 359", status: "remaining" },
+        { code: "IAT 360", status: "remaining" },
+        { code: "IAT 381", status: "remaining" },
+        { code: "IAT 387", status: "remaining" },
+        { code: "IAT 410", status: "remaining" },
         { code: "IAT 432", status: "remaining" },
         { code: "IAT 452", status: "remaining" },
-      ];
-       
+        { code: "IAT 459", status: "remaining" },
+        { code: "IAT 460", status: "remaining" },
+        { code: "IAT 461", status: "remaining" },
+        { code: "IAT 481", status: "remaining" },
+        { code: "IAT 487", status: "remaining" },
+        { code: "IAT 499", status: "remaining" }
+    ]);
+
+    const timeline = summary?.timeline;
+    const requirements = summary?.requirements;
+
+    const formatCourses = (_timeline) => {
+        // null check
+        if (!_timeline) return [];
+
+        return Object.values(_timeline).flatMap(term => term.courses || []);
+    };
+
+    const updateRequirements = (division, completedCourses) => {
+        // look up for courses
+        return division.map((reqCourse) => {
+            const matchedCourse = completedCourses.find(
+                (course) => course.code === reqCourse.code
+            );
+
+            return matchedCourse
+                ? { ...reqCourse, status: matchedCourse.status }
+                : reqCourse;
+        });
+    };
+
+    useEffect(() => {
+        if (!summary || !timeline) return;
+
+        const formattedCourses = formatCourses(timeline);
+        setCourses(formattedCourses);
+    }, [summary, timeline]);
+
+    useEffect(() => {
+        if (!courses.length) return;
+
+        SET_LOWER_DIVISION((prev) => updateRequirements(prev, courses));
+        SET_UPPER_DIVISION((prev) => updateRequirements(prev, courses));
+    }, [courses]);
+
+    const COLORS = {
+        completed: "#E24B4A",
+        inProgress: "#185FA5",
+        remaining: "transparent",
+        lowerDiv: "#E24B4A",
+        upperDiv: "#185FA5",
+        breadth: "#EF9F27",
+        bachelor: "#1D9E75",
+    };
+
+    console.log(summary)
+
     return (
         <>
             <div className={styles.container}>
@@ -159,35 +207,38 @@ export const DegreePlanner = () => {
                         <p>SIAT Major | BSc | 120 credits total</p>
                     </div>
                     <div className={styles.degreeHeaderRight}>
-                        <div className={styles.degreeHeaderPercent}>16%</div>
+                        <div className={styles.degreeHeaderPercent}>{summary?.summary.percentComplete}%</div>
                         <p className={styles.degreeHeaderLabel}>Degree Completed</p>
                     </div>
                 </header>
 
                 {/* Overall */}
                 <OverallProgressCard
-                    completed={6}
-                    inProgress={4}
-                    remaining={30}
+                creditsDone={summary?.summary.creditsCompleted}
+                    completed={summary?.summary.creditsCompleted}
+                    inProgress={summary?.summary.creditsInProgress}
+                    remaining={summary?.summary.creditsRemaining}
                     total={120}
                     COLORS={COLORS}
                 />
 
-                {/* Sections grid */}
+                {/* Sections grid 
+                it's so ugly oml => refactor into a state later maybe?
+                */}
                 <div className={styles.sectionGrid}>
                     <SectionCard
                         title="Lower Division"
-                        percent={40}
-                        creditsDone={12}
-                        creditsTotal={30}
+                        percent={Math.round((requirements?.lowerDivisionRequired?.creditsCompleted + requirements?.lowerDivisionElectives?.creditsCompleted)/39 * 100)}
+                        creditsDone={requirements?.lowerDivisionRequired?.creditsCompleted + requirements?.lowerDivisionElectives?.creditsCompleted }
+                        creditsTotal={39}
                         courses={LOWER_DIVISION}
                         accentColor={COLORS.lowerDiv}
                     />
                     <SectionCard
-                        title="Upper Division"
-                        percent={12}
-                        creditsDone={7}
-                        creditsTotal={44}
+                        title="Upper Division (Science)"
+                        percent={Math.round((requirements?.upperDivisionScience?.creditsCompleted + requirements?.upperDivisionScience?.creditsInProgress)/24 * 100)}
+                        creditsDone={requirements?.upperDivisionScience?.creditsCompleted + requirements?.upperDivisionScience?.creditsInProgress}
+                        creditsTotal={24}
                         courses={UPPER_DIVISION}
                         accentColor={COLORS.upperDiv}
                     />
@@ -201,8 +252,8 @@ export const DegreePlanner = () => {
                     />
                     <SectionCard
                         title="Bachelor Req."
-                        percent={0}
-                        creditsDone={19}
+                        percent={Math.round(summary?.summary.creditsCompleted / 120 * 100)}
+                        creditsDone={summary?.summary.creditsCompleted}
                         creditsTotal={120}
                         courses={[]}
                         accentColor={COLORS.bachelor}

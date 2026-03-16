@@ -9,8 +9,9 @@ import { TestCataloguePage } from "./views/test/TestCataloguePage";
 
 import { LandingView } from "./views/LandingView";
 import { AuthView } from "./views/AuthView";
-import {DashboardView} from "./views/DashboardView";
+import { DashboardView } from "./views/DashboardView";
 import { CourseCatalogueView } from "./views/CourseCatalogueView";
+import { DegreePlannerView } from "./views/DegreePlannerView";
 
 import { DegreePlanner } from "./components/DegreePlanner"
 
@@ -19,7 +20,7 @@ function App() {
 
   useEffect(() => {
     setMounted(true);
-  },[])
+  }, [])
 
   const BACK_PORT = 5050;
 
@@ -28,18 +29,34 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            <Route path="/" element={ <LandingView mounted={mounted}/> }/>
-            
-            <Route path="/login" element={ <AuthView />} />
+            <Route path="/" element={<LandingView mounted={mounted} />} />
+
+            <Route path="/login" element={<AuthView />} />
 
             {/* Protected Routes */}
-            <Route 
+            <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
                   <DashboardView />
                 </ProtectedRoute>
-              } 
+              }
+            />
+            <Route
+              path="/course-catalogue"
+              element={
+                <ProtectedRoute>
+                  <CourseCatalogueView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/degree"
+              element={
+                <ProtectedRoute>
+                  <DegreePlannerView/>
+                </ProtectedRoute>
+              }
             />
             <Route
               path="devdash"
@@ -49,15 +66,7 @@ function App() {
                   <PdfUploadPage />
                   <SFUCoursesPage />
                 </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="course-catalogue"
-              element={
-                <ProtectedRoute>
-                  <CourseCatalogueView />
-                </ProtectedRoute>
-            }
+              }
             />
           </Routes>
         </Router>
