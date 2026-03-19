@@ -2,7 +2,8 @@
 const express = require("express");
 const router = express.Router();
 const WQBCourse = require("../models/wqbCourse");
-const CourseSection = require("../models/CourseSection")
+const CourseSection = require("../models/CourseSection");
+const scheduleGenerator = require("../controllers/scheduleGenerator");
 
 // SFU API courses in dept. route (req includes => {year, term, department })
 router.post("/courses", async (req, res) => {
@@ -103,6 +104,13 @@ router.get("/available-courses", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+})
+
+// Makes a schedule based off incoming course codes
+router.post("/make-schedule", async(req, res) => {
+  if (!req.body) return res.status(400).json({ error: "No body attached" });
+
+  
 })
 
 module.exports = router;
