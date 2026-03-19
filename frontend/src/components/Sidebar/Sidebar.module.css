@@ -218,4 +218,5 @@ currently hard coded, i'll deal w it later
     text-align: left;
     font-weight: 600;
     color: #d0202e;
+    cursor: pointer;
 }
