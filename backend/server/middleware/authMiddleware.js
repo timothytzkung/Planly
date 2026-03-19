@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-function verifyToken(req, res, next) {
+exports.verifyToken = function (req, res, next) {
   // 1. get token from header
   const token = req.header("Authorization");
 
@@ -20,4 +20,20 @@ function verifyToken(req, res, next) {
   }
 }
 
-module.exports = verifyToken;
+// Verifies users via role in wristband
+exports.verifyAdmin = function (req, res, next) {
+  // empty check
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized" })
+  }
+
+  // check role
+  if (req.user.role !== "admin") {
+    // 403 => no permissions
+    return res.status(403).json({ message: "Forbidden" })
+  }
+
+  // if user is admin, continue to router
+  next();
+}
+

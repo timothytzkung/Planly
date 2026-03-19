@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const Transcript = require("../models/Transcript");
-const verifyToken = require("../middleware/authMiddleware");
+const {verifyToken} = require("../middleware/authMiddleware");
 
 
 // Helper function for mapping incoming transcript data

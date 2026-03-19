@@ -61,7 +61,7 @@ function App() {
             <Route
               path="devdash"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute adminOnly={true}>
                   <DegreePlanner />
                   <PdfUploadPage />
                   <SFUCoursesPage />
