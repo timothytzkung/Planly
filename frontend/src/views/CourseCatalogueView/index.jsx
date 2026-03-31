@@ -83,7 +83,7 @@ const FiltersPanel = ({ filters, onToggle }) => {
     );
 }
 
-export const CourseCatalogueView = () => {
+export const CourseCatalogue = ( { numResults=7 } ) => {
     // hard coded filter strings
     const CHIPS = ["All", "SIAT Core", "Upper Division", "Breadth", "No Pre-reqs", "Online Only"];
 
@@ -92,7 +92,7 @@ export const CourseCatalogueView = () => {
     const [courses, setCourses] = useState([]);
     const [inputValue, setInputValue] = useState("");
     const [page, setPage] = useState(1);
-    const [limit] = useState(7);
+    const [limit] = useState(numResults);
 
     const [total, setTotal] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
@@ -188,9 +188,11 @@ export const CourseCatalogueView = () => {
 
     return (
         <>
-            <div className={styles.container}>
-                <Sidebar />
-                <div className={styles.main}>
+            {/* <div className={styles.container}>
+                <Sidebar /> */}
+                <div 
+                className={styles.main} 
+                >
                     <div className={styles.content}>
                         {/* Header row */}
                         <div className={styles.resultBar}>
@@ -242,13 +244,27 @@ export const CourseCatalogueView = () => {
                             {courses?.map(course => (
                                 <CourseCard key={course._id} course={course} onTogglePlan={togglePlan} />
                             ))}
+                        { courses.length === 0 &&
+                            <div>
+                             <p>No results found.</p>
+                            </div>
+                        }
                         </div>
                     </div>
 
                     {/* Filters */}
                     {/* <FiltersPanel filters={filters} onToggle={toggleFilter} /> */}
                 </div>
-            </div>
+            {/* </div> */}
         </>
     );
+}
+
+export const CourseCatalogueView = () => {
+    return(
+        <div className={styles.container}>
+            <Sidebar />
+            <CourseCatalogue />
+        </div>
+    )
 }

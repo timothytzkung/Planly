@@ -3,6 +3,8 @@ import { PrimaryButton } from "../../components/PrimaryButton";
 import { SecondaryButton } from "../../components/SecondaryButton";
 import styles from "./LandingView.module.css";
 
+import { CourseCatalogue } from "../../views/CourseCatalogueView"
+
 import { useEffect, useState } from "react";
 import logo from "../../assets/logo.svg"
 
@@ -18,7 +20,8 @@ export const LandingView = ({ mounted }) => {
 
     // I'm using some inline styling so I can use the useEffect shiz
     return (
-        <main className={styles.main}>
+        <>
+        <div className={styles.main}>
             <div className={styles.topContainer}>
                 <img src={logo} style={{
                     width: "70px",
@@ -91,6 +94,18 @@ export const LandingView = ({ mounted }) => {
                 <PrimaryButton label={"Upload your PDF →"} />
                 <SecondaryButton label={"Log In"} onClick={() => navigate("/login")}/>
             </div>
-        </main>
+
+        </div>
+        <CourseCatalogue numResults={4}/>
+        <div className={styles.infoCard}>
+            <p className={styles.infoCardHeader}>Want to plan these courses?</p>
+            <p className={styles.infoCardText}>Create a free account to add courses to your semester plan, track requirements, and see your degree progress.</p>
+            <div className={styles.buttonContainer}>
+                <PrimaryButton label={"Create Free Account →"} onClick={() => navigate("/login")}/>
+            </div>
+
+        </div>
+    </>
+        
     )
 }

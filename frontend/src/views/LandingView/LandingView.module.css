@@ -24,3 +24,38 @@
     display: flex;
     gap: 2.5rem;
 }
+
+
+.infoCard {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1em;
+    margin-left: 475px;
+    margin-right: 110px;
+    align-items: flex-start;
+    gap: 0px;
+
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex;
+
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.2s;
+    margin-bottom: 6rem;
+
+}
+
+.infoCardHeader {
+    font-weight: 600;
+    font-size: 18px;
+    color: #000;
+    margin: 0;
+    padding-bottom: 0.5rem;
+}
+
+.infoCardText {
+    color: #000;
+    margin: 0;
+    padding-bottom: 1rem;
+}
