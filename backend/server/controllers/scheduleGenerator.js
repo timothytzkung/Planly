@@ -4,7 +4,7 @@
  * @returns {Array} Formatted schedule grouped by day.
  */
 
-export const scheduleGenerator = (rawData) => {
+export const GenerateSchedule = (rawData) => {
     // Initialize the base schedule structure
     const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
     const schedule = daysOfWeek.map(day => ({ day, classes: [] }));
@@ -80,5 +80,5 @@ export const scheduleGenerator = (rawData) => {
 
 // Example usage
 // const rawCourses = [course1, course2, course3, course4];
-// const mySchedule = formatSchedule(rawCourses);
+// const mySchedule = scheduleGenerator(rawCourses);
 // console.log(JSON.stringify(mySchedule, null, 2));

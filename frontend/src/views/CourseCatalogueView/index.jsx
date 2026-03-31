@@ -29,7 +29,7 @@ const CourseCard = ({ course, onTogglePlan }) => {
                     {course.instructor.length > 0 ? (
                         course.instructor.map((i) => i.name).join(", ")
                     ) : "Not Announced"}
-                    </div>
+                </div>
             </div>
             <div className={styles.cardRight}>
                 <span className={styles.cardCredits}>{course.info.units} Cr</span>
@@ -83,7 +83,7 @@ const FiltersPanel = ({ filters, onToggle }) => {
     );
 }
 
-export const CourseCatalogue = ( { numResults=7 } ) => {
+export const CourseCatalogue = ({ numResults = 7 }) => {
     // hard coded filter strings
     const CHIPS = ["All", "SIAT Core", "Upper Division", "Breadth", "No Pre-reqs", "Online Only"];
 
@@ -144,15 +144,11 @@ export const CourseCatalogue = ( { numResults=7 } ) => {
 
     useEffect(() => {
         const delay = setTimeout(() => {
-          fetchCourses();
+            fetchCourses();
         }, 100);
-      
-        return () => clearTimeout(delay);
-      }, [search]);
 
-    useEffect(() => {
-        console.log("courses changed:", courses);
-      }, [courses]);
+        return () => clearTimeout(delay);
+    }, [search]);
 
     const handleSearchSubmit = (e) => {
         e.preventDefault();
@@ -184,21 +180,21 @@ export const CourseCatalogue = ( { numResults=7 } ) => {
 
     useEffect(() => {
         fetchCourses();
-      }, [page, search]);
+    }, [page, search]);
 
     return (
         <>
             {/* <div className={styles.container}>
                 <Sidebar /> */}
-                <div 
-                className={styles.main} 
-                >
-                    <div className={styles.content}>
-                        {/* Header row */}
-                        <div className={styles.resultBar}>
-                            <h1 className={styles.pageTitle}>Course Catalogue</h1>
-                            {/* WIP */}
-                            {/* <div className={styles.sortBar}>
+            <div
+                className={styles.main}
+            >
+                <div className={styles.content}>
+                    {/* Header row */}
+                    <div className={styles.resultBar}>
+                        <h1 className={styles.pageTitle}>Course Catalogue</h1>
+                        {/* WIP */}
+                        {/* <div className={styles.sortBar}>
                                 Sort by:
                                 <select className={styles.sortSelect}>
                                     <option>Relevance</option>
@@ -206,65 +202,66 @@ export const CourseCatalogue = ( { numResults=7 } ) => {
                                     <option>Credits</option>
                                 </select>
                             </div> */}
-                        </div>
+                    </div>
 
-                        {/* Results count WIP
+                    {/* Results count WIP
                         => Too lazy to create separate className
                         */}
-                        {/* <div style={{ marginBottom: 12, fontSize: 14, color: "#555" }}>
+                    {/* <div style={{ marginBottom: 12, fontSize: 14, color: "#555" }}>
                             <span style={{ color: "#c8102e", fontWeight: 600 }}>{courses?.length} courses found</span>
                             {totalActive > 0 && (
                                 <> | <span className={styles.filterActive}>{totalActive} filter{totalActive > 1 ? "s" : ""} active</span></>
                             )}
                         </div> */}
 
-                        {/* Search => Not using InputField component for more precise styling */}
-                        <input
-                            className={styles.searchBox}
-                            placeholder="Search by course code, title, keyword, or instructor..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
+                    {/* Search => Not using InputField component for more precise styling */}
+                    <input
+                        className={styles.searchBox}
+                        placeholder="Search by course code, title, keyword, or instructor..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
 
-                        {/* Chips */}
-                        <div className={styles.chips}>
-                            {CHIPS.map(chip => (
-                                <div
-                                    key={chip}
-                                    className={`${styles.chip} ${activeChip === chip ? "active" : ""}`}
-                                    onClick={() => setChip(chip)}
-                                >
-                                    {chip}
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Course list */}
-                        <div className={styles.courseList}>
-                            {courses?.map(course => (
-                                <CourseCard key={course._id} course={course} onTogglePlan={togglePlan} />
-                            ))}
-                        { courses.length === 0 &&
-                            <div>
-                             <p>No results found.</p>
+                    {/* Chips */}
+                    <div className={styles.chips}>
+                        {CHIPS.map(chip => (
+                            <div
+                                key={chip}
+                                className={`${styles.chip} ${activeChip === chip ? "active" : ""}`}
+                                onClick={() => setChip(chip)}
+                            >
+                                {chip}
                             </div>
-                        }
-                        </div>
+                        ))}
                     </div>
 
-                    {/* Filters */}
-                    {/* <FiltersPanel filters={filters} onToggle={toggleFilter} /> */}
+                    {/* Course list */}
+                    <div className={styles.courseList}>
+                        {courses?.map(course => (
+                            <CourseCard key={course._id} course={course} onTogglePlan={togglePlan} />
+                        ))}
+                        {courses.length === 0 &&
+                            <div>
+                                <p>No results found.</p>
+                            </div>
+                        }
+                    </div>
                 </div>
+
+                {/* Filters */}
+                {/* <FiltersPanel filters={filters} onToggle={toggleFilter} /> */}
+            </div>
             {/* </div> */}
         </>
     );
 }
 
 export const CourseCatalogueView = () => {
-    return(
+    return (
         <div className={styles.container}>
             <Sidebar />
             <CourseCatalogue />
         </div>
+
     )
 }

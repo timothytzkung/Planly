@@ -3,6 +3,9 @@
 
  import { useState, useEffect, useContext } from 'react';
  import { AuthContext } from "../../context/AuthContext";
+ import { UserContext } from "../../context/UserContext";
+
+ import styles from "./DegreePlanner.module.css"
 
 
  export const DegreePlannerView = () => {
@@ -42,7 +45,7 @@
     }, [summary])
 
     return(
-        <div>
+        <div className={styles.container}>
             <Sidebar />
             <DegreePlanner summary={summary}/>
         </div>

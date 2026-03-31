@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const WQBCourse = require("../models/wqbCourse");
 const CourseSection = require("../models/CourseSection");
-const scheduleGenerator = require("../controllers/scheduleGenerator");
+const { GenerateSchedule } = require("../controllers/scheduleGenerator");
 
 // SFU API courses in dept. route (req includes => {year, term, department })
 router.post("/courses", async (req, res) => {
@@ -110,7 +110,20 @@ router.get("/available-courses", async (req, res) => {
 router.post("/make-schedule", async(req, res) => {
   if (!req.body) return res.status(400).json({ error: "No body attached" });
 
-  
+  // expecting array of courses
+  try {
+    const rawCourses = req.body.courses;
+    const schedule = GenerateSchedule(rawCourses);
+    
+    return res.json({
+      schedule
+    })
+  } catch (e) {
+    return res.status(500).json( {error: e.message })
+  }
+
+
+
 })
 
 module.exports = router;
