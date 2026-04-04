@@ -157,26 +157,57 @@ router.get("/available-courses", async (req, res) => {
 });
 
 // Makes a schedule based off incoming course codes
-router.post("/make-schedule", async(req, res) => {
-  if (!req.body) return res.status(400).json({ error: "No body attached" });
-
-  // expecting array of courses, i.e. ["IAT 100", "EDUC 100W"]
+router.post("/make-schedule", async (req, res) => {
   try {
-    const tmp = []
-    const coursesArr = req.body.courses; // array of courses, i.e. ["IAT 100", "EDUC 100W"]
+    const { courses } = req.body;
+    console.log(courses)
 
+    if (!Array.isArray(courses) || courses.length === 0) {
+      return res.status(400).json({
+        error: "Request body must include a non-empty 'courses' array",
+      });
+    }
 
-    const schedule = GenerateSchedule(rawCourses);
-    
-    return res.json({
-      schedule
-    })
+    const normalizedCourses = [...new Set(
+      courses.map((course) => course.trim().toUpperCase().replace(/\s+/g, " "))
+    )];
+
+    // Fetch first section for each requested course
+    const rawCourses = await Promise.all(
+      normalizedCourses.map(async (courseCode) => {
+        return await CourseSection.findOne({ courseCode })
+          .sort({ section: 1 }) // picks the "first" section consistently
+          .lean();
+      })
+    );
+
+    const validCourses = rawCourses.filter(Boolean);
+    const foundCourses = validCourses.map((course) => course.courseCode);
+    const missingCourses = normalizedCourses.filter(
+      (code) => !foundCourses.includes(code)
+    );
+
+    if (validCourses.length === 0) {
+      return res.status(404).json({
+        error: "No matching courses found",
+        missingCourses,
+      });
+    }
+    console.log(validCourses)
+    console.log(foundCourses)
+    const schedule = GenerateSchedule(validCourses);
+    console.log(schedule)
+
+    return res.status(200).json({
+      schedule,
+      foundCourses,
+      missingCourses,
+    });
   } catch (e) {
-    return res.status(500).json( {error: e.message })
+    return res.status(500).json({
+      error: e.message || "Internal server error",
+    });
   }
-
-
-
-})
+});
 
 module.exports = router;

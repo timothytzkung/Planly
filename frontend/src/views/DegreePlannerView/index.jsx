@@ -1,5 +1,6 @@
  import { DegreePlanner } from "../../components/DegreePlanner";
  import { Sidebar } from "../../components/Sidebar";
+ import { Schedule } from "../../components/Schedule";
 
  import { useState, useEffect, useContext } from 'react';
  import { AuthContext } from "../../context/AuthContext";
@@ -48,6 +49,7 @@
         <div className={styles.container}>
             <Sidebar />
             <DegreePlanner summary={summary}/>
+            <Schedule />
         </div>
         
     )

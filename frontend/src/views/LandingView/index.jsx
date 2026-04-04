@@ -103,7 +103,6 @@ export const LandingView = ({ mounted }) => {
             <div className={styles.buttonContainer}>
                 <PrimaryButton label={"Create Free Account →"} onClick={() => navigate("/login")}/>
             </div>
-
         </div>
     </>
         

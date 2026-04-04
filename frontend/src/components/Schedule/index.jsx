@@ -23,19 +23,16 @@ export const Schedule = ({ }) => {
     const [activeDay, setActiveDay] = useState(null);
     const [schedule, setSchedule] = useState(null)
 
-
     const fetchSchedule = async() => {
         // format payload
-        console.log(currentCourses)
-        // const payload = currentCourses.map((course) => course.code);
-        // console.log(payload)
+        const payload = currentCourses.map((course) => course.code); // gives array of courses such as ["EDUC 100W", "IAT 100"]
         try {
             const res = await fetch(`http://localhost:${backport}/api/sfuCourses/make-schedule`, {
                 method: "POST",
                 headers: {
                     "Content-Type":  "application/json"
                 },
-                body: JSON.stringify({courses: currentCourses})
+                body: JSON.stringify({courses: payload})
             });
             if (res.ok) {
                 const result = await res.json();
@@ -69,7 +66,11 @@ export const Schedule = ({ }) => {
                             <CalendarIcon />
                         </button>
                     </div>
-
+                    {!schedule && 
+                    <div>
+                        Upload Transcript to Generate Schedule!
+                    </div>
+                    }
                     {schedule?.map((dayData, dayIdx) => (
                         <div key={dayData.day}>
                             <div className={styles.daySection}>
