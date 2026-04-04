@@ -12,6 +12,7 @@ import { AuthView } from "./views/AuthView";
 import { DashboardView } from "./views/DashboardView";
 import { CourseCatalogueView } from "./views/CourseCatalogueView";
 import { DegreePlannerView } from "./views/DegreePlannerView";
+import { TranscriptView } from "./views/TranscriptView";
 
 import { DegreePlanner } from "./components/DegreePlanner"
 
@@ -30,7 +31,6 @@ function App() {
         <Router>
           <Routes>
             <Route path="/" element={<LandingView mounted={mounted} />} />
-
             <Route path="/login" element={<AuthView />} />
 
             {/* Protected Routes */}
@@ -59,9 +59,17 @@ function App() {
               }
             />
             <Route
+              path="/transcript"
+              element={
+                <ProtectedRoute>
+                  <TranscriptView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="devdash"
               element={
-                <ProtectedRoute adminOnly={true}>
+                <ProtectedRoute>
                   <DegreePlanner />
                   <PdfUploadPage />
                   <SFUCoursesPage />

@@ -160,7 +160,6 @@ router.get("/available-courses", async (req, res) => {
 router.post("/make-schedule", async (req, res) => {
   try {
     const { courses } = req.body;
-    console.log(courses)
 
     if (!Array.isArray(courses) || courses.length === 0) {
       return res.status(400).json({
@@ -193,10 +192,7 @@ router.post("/make-schedule", async (req, res) => {
         missingCourses,
       });
     }
-    console.log(validCourses)
-    console.log(foundCourses)
     const schedule = GenerateSchedule(validCourses);
-    console.log(schedule)
 
     return res.status(200).json({
       schedule,

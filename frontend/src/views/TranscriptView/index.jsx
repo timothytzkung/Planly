@@ -9,10 +9,8 @@ export const TranscriptView = () => {
 
 
     return(
-        <>
+        <div className={styles.layout}>
             <Sidebar />
-
-            <Schedule />
-        </>
+        </div>
     )
 }
