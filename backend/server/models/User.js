@@ -21,7 +21,9 @@ const UserSchema = new mongoose.Schema({
         required: true,
     },
     role: {
-        type: String
+        type: String, 
+        enum: ['member', 'admin'], // Guarantees that only these specific values can be saved
+        default: 'member' // Every new registration gets lowest priv.
     }
 });
 
