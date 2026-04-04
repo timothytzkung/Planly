@@ -19,6 +19,41 @@ export function AuthProvider({ children }) {
       return null;
     }
   });
+  const [summary, setSummary] = useState(null);
+  const [currentCourses, setCurrentCourses] = useState([]);
+
+
+  // fetch summaries
+  const fetchSummary = async () => {
+    try {
+      const res = await fetch(`http://localhost:${backport}/api/summary/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ data: user })
+      });
+      if (res.ok) {
+        const result = await res.json();
+        return result;
+      }
+    } catch (e) {
+      console.log("Error fetching summary: ", e);
+    }
+  }
+
+  // Summary fetching
+  useEffect(() => {
+    if (user || token) {
+      const handleFetchSummary = async () => {
+        const result = await fetchSummary();
+        setSummary(result);
+      }
+      if (!summary) {
+        handleFetchSummary();
+      }
+    }
+  }, [summary, user])
 
   // useEffect runs whenever the token changes (login, logout, or initial load)
   useEffect(() => {
@@ -62,7 +97,7 @@ export function AuthProvider({ children }) {
     // we provide 'token' and 'user' (data)
     // and 'login' and 'logout' (functions) to the whole app
 
-    <AuthContext.Provider value={{ token, user, login, logout, updateUser, backport }}>
+    <AuthContext.Provider value={{ token, user, login, logout, updateUser, backport, summary, setSummary, currentCourses, setCurrentCourses}}>
       {children}
     </AuthContext.Provider>
   );

@@ -2,7 +2,8 @@
 const express = require("express");
 const router = express.Router();
 const WQBCourse = require("../models/wqbCourse");
-const CourseSection = require("../models/CourseSection")
+const CourseSection = require("../models/CourseSection");
+const { GenerateSchedule } = require("../controllers/scheduleGenerator");
 
 // SFU API courses in dept. route (req includes => {year, term, department })
 router.post("/courses", async (req, res) => {
@@ -70,39 +71,143 @@ router.get("/breadth-courses", async (req, res) => {
 // Fetches available courses in summer 2026 (just for now, idk if will add later)
 router.get("/available-courses", async (req, res) => {
   try {
-    // Limit by pages & set default vals
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50;
-    const search = req.query.search || "";
+    const {
+      page = 1,
+      limit = 7,
+      search = "",
+      departmentCode,
+      level,
+      designation,
+      noPrereqs,
+      deliveryMethod,
+    } = req.query;
 
-    // page skip
-    const skip = (page - 1) * limit;
+    const query = {};
+    const andConditions = [];
 
-    // mongodb query 
-    const query = search
-      ? {
+    if (search.trim()) {
+      andConditions.push({
         $or: [
+          { courseCode: { $regex: search, $options: "i" } },
           { courseTitle: { $regex: search, $options: "i" } },
-          { courseCode: { $regex: search, $options: "i" } }
-        ]
-      }
-      : {};
+          { "info.description": { $regex: search, $options: "i" } },
+          { departmentCode: { $regex: search, $options: "i" } },
+        ],
+      });
+    }
 
-    // only return when promises all fulfilled
+    if (departmentCode) {
+      andConditions.push({
+        departmentCode: { $regex: `^${departmentCode}$`, $options: "i" },
+      });
+    }
+
+    if (level === "upper") {
+      andConditions.push({
+        courseNumber: { $regex: "^[3-4][0-9]{2}[A-Z]?$", $options: "i" },
+      });
+    }
+
+    if (designation) {
+      andConditions.push({
+        "info.designation": { $regex: designation, $options: "i" },
+      });
+    }
+
+    if (noPrereqs === "true") {
+      andConditions.push({
+        $or: [
+          { "info.prerequisites": "" },
+          { "info.prerequisites": null },
+        ],
+      });
+    }
+
+    if (deliveryMethod) {
+      andConditions.push({
+        "info.deliveryMethod": { $regex: deliveryMethod, $options: "i" },
+      });
+    }
+
+    if (andConditions.length > 0) {
+      query.$and = andConditions;
+    }
+
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
+    const skip = (pageNum - 1) * limitNum;
+
     const [items, total] = await Promise.all([
-      CourseSection.find(query).skip(skip).limit(limit).lean(),
-      CourseSection.countDocuments(query)
+      CourseSection.find(query).skip(skip).limit(limitNum).lean(),
+      CourseSection.countDocuments(query),
     ]);
 
     res.json({
       items,
       total,
-      page,
-      totalPages: Math.ceil(total / limit)
+      page: pageNum,
+      totalPages: Math.ceil(total / limitNum),
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({
+      message: "Failed to fetch courses",
+    });
   }
-})
+});
+
+// Makes a schedule based off incoming course codes
+router.post("/make-schedule", async (req, res) => {
+  try {
+    const { courses } = req.body;
+    console.log(courses)
+
+    if (!Array.isArray(courses) || courses.length === 0) {
+      return res.status(400).json({
+        error: "Request body must include a non-empty 'courses' array",
+      });
+    }
+
+    const normalizedCourses = [...new Set(
+      courses.map((course) => course.trim().toUpperCase().replace(/\s+/g, " "))
+    )];
+
+    // Fetch first section for each requested course
+    const rawCourses = await Promise.all(
+      normalizedCourses.map(async (courseCode) => {
+        return await CourseSection.findOne({ courseCode })
+          .sort({ section: 1 }) // picks the "first" section consistently
+          .lean();
+      })
+    );
+
+    const validCourses = rawCourses.filter(Boolean);
+    const foundCourses = validCourses.map((course) => course.courseCode);
+    const missingCourses = normalizedCourses.filter(
+      (code) => !foundCourses.includes(code)
+    );
+
+    if (validCourses.length === 0) {
+      return res.status(404).json({
+        error: "No matching courses found",
+        missingCourses,
+      });
+    }
+    console.log(validCourses)
+    console.log(foundCourses)
+    const schedule = GenerateSchedule(validCourses);
+    console.log(schedule)
+
+    return res.status(200).json({
+      schedule,
+      foundCourses,
+      missingCourses,
+    });
+  } catch (e) {
+    return res.status(500).json({
+      error: e.message || "Internal server error",
+    });
+  }
+});
 
 module.exports = router;

@@ -196,7 +196,7 @@ export const DegreePlanner = ({ summary }) => {
     };
 
     // Debug for schema visibility
-    // console.log(summary)
+    console.log(summary)
 
     return (
         <>
@@ -245,8 +245,18 @@ export const DegreePlanner = ({ summary }) => {
                     />
                     <SectionCard
                         title="Breadth Req."
-                        percent={0}
-                        creditsDone={0}
+                        percent={
+                            Math.floor((requirements?.wqb.breadth.additional.completed +
+                            requirements?.wqb.breadth.humanities.completed +
+                            requirements?.wqb.breadth.science.completed +
+                            requirements?.wqb.breadth.socialScience.completed) /36 * 100)
+                        }
+                        creditsDone={
+                            requirements?.wqb.breadth.additional.completed +
+                            requirements?.wqb.breadth.humanities.completed +
+                            requirements?.wqb.breadth.science.completed +
+                            requirements?.wqb.breadth.socialScience.completed
+                        }
                         creditsTotal={36}
                         courses={[]}
                         accentColor={COLORS.breadth}

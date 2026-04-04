@@ -29,7 +29,7 @@ const CourseCard = ({ course, onTogglePlan }) => {
                     {course.instructor.length > 0 ? (
                         course.instructor.map((i) => i.name).join(", ")
                     ) : "Not Announced"}
-                    </div>
+                </div>
             </div>
             <div className={styles.cardRight}>
                 <span className={styles.cardCredits}>{course.info.units} Cr</span>
@@ -83,16 +83,21 @@ const FiltersPanel = ({ filters, onToggle }) => {
     );
 }
 
-export const CourseCatalogueView = () => {
-    // hard coded filter strings
-    const CHIPS = ["All", "SIAT Core", "Upper Division", "Breadth", "No Pre-reqs", "Online Only"];
+export const CourseCatalogue = ({ numResults = 7 }) => {
+    const CHIPS = [
+        "All",
+        "SIAT Core",
+        "Upper Division",
+        "Breadth",
+        "No Pre-reqs",
+        "Online Only",
+    ];
 
     const [search, setSearch] = useState("");
-    const [activeChip, setChip] = useState("All");
+    const [activeChip, setActiveChip] = useState("All");
     const [courses, setCourses] = useState([]);
-    const [inputValue, setInputValue] = useState("");
     const [page, setPage] = useState(1);
-    const [limit] = useState(7);
+    const [limit] = useState(numResults);
 
     const [total, setTotal] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
@@ -100,16 +105,31 @@ export const CourseCatalogueView = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    // Might remove later
-    const [filters, setFilters] = useState({
-        dept: [], req: ["SIAT Core"], level: [], delivery: [], term: []
-    });
-
     const BACK_PORT = 5050;
 
-    // Set active filters
-    const totalActive = Object.values(filters).flat().length;
+    function getChipParams(chip) {
+        switch (chip) {
+            case "SIAT Core":
+                return { departmentCode: "IAT" };
 
+            case "Upper Division":
+                return { level: "upper" };
+
+            case "Breadth":
+                return { designation: "Writing" };
+            // change this later if you want a different breadth definition
+
+            case "No Pre-reqs":
+                return { noPrereqs: "true" };
+
+            case "Online Only":
+                return { deliveryMethod: "Online" };
+
+            case "All":
+            default:
+                return {};
+        }
+    }
 
     const fetchCourses = async () => {
         try {
@@ -119,136 +139,133 @@ export const CourseCatalogueView = () => {
             const params = new URLSearchParams({
                 page: page.toString(),
                 limit: limit.toString(),
-                search: search
             });
-            const res = await fetch(`http://localhost:${BACK_PORT}/api/sfuCourses/available-courses?${params}`, {
-                method: "GET"
+
+            if (search.trim()) {
+                params.set("search", search.trim());
+            }
+
+            const chipParams = getChipParams(activeChip);
+            Object.entries(chipParams).forEach(([key, value]) => {
+                params.set(key, value);
             });
+
+            const res = await fetch(
+                `http://localhost:${BACK_PORT}/api/sfuCourses/available-courses?${params.toString()}`,
+                {
+                    method: "GET",
+                }
+            );
+
             if (!res.ok) {
                 throw new Error("Failed to fetch courses");
             }
 
             const data = await res.json();
 
-            setCourses(data.items);
-            setTotal(data.total);
-            setTotalPages(data.totalPages);
-            // return (data);
+            setCourses(data.items || []);
+            setTotal(data.total || 0);
+            setTotalPages(data.totalPages || 1);
         } catch (err) {
             setError(err.message || "Something went wrong");
             setCourses([]);
+            setTotal(0);
+            setTotalPages(1);
         } finally {
             setLoading(false);
         }
     };
 
+    // Small debounce
     useEffect(() => {
         const delay = setTimeout(() => {
           fetchCourses();
         }, 100);
       
         return () => clearTimeout(delay);
-      }, [search]);
-
-    useEffect(() => {
-        console.log("courses changed:", courses);
-      }, [courses]);
+      }, [page, search, activeChip]);
 
     const handleSearchSubmit = (e) => {
         e.preventDefault();
-        setPage(1);          // reset to first page when searching
+        setPage(1);
         setSearch(inputValue);
     };
 
-    // Toggle filters
-    function toggleFilter(group, value) {
-        setFilters(prev => {
-            const arr = prev[group];
-            return {
-                ...prev,
-                [group]: arr.includes(value) ? arr.filter(v => v !== value) : [...arr, value]
-            };
-        });
-    }
+    const handleChipClick = (chip) => {
+        setPage(1);
+        setActiveChip(chip);
+    };
 
-    // See if planned
     function togglePlan(id) {
-        setCourses(prev => prev.map(c => c._id === id ? { ...c, planned: !c.planned } : c));
+        setCourses((prev) =>
+            prev.map((c) => (c._id === id ? { ...c, planned: !c.planned } : c))
+        );
     }
-
-    // // Format displayed
-    // const displayed = courses.filter(c =>
-    //     c.courseCode.toLowerCase().includes(search.toLowerCase()) ||
-    //     c.courseTitle.toLowerCase().includes(search.toLowerCase())
-    // );
-
-    useEffect(() => {
-        fetchCourses();
-      }, [page, search]);
 
     return (
-        <>
-            <div className={styles.container}>
-                <Sidebar />
-                <div className={styles.main}>
-                    <div className={styles.content}>
-                        {/* Header row */}
-                        <div className={styles.resultBar}>
-                            <h1 className={styles.pageTitle}>Course Catalogue</h1>
-                            {/* WIP */}
-                            {/* <div className={styles.sortBar}>
-                                Sort by:
-                                <select className={styles.sortSelect}>
-                                    <option>Relevance</option>
-                                    <option>Name</option>
-                                    <option>Credits</option>
-                                </select>
-                            </div> */}
+        <div className={styles.main}>
+            <div className={styles.content}>
+                <div className={styles.resultBar}>
+                    <h1 className={styles.pageTitle}>Course Catalogue</h1>
+                </div>
+
+                {/* <form onSubmit={handleSearchSubmit}> */}
+                <input
+                    className={styles.searchBox}
+                    placeholder="Search by course code, title, or keyword..."
+                    value={search}
+                    onChange={(e) => {
+                        setPage(1);
+                        setSearch(e.target.value);
+                    }}
+                />
+                {/* </form> */}
+
+                <div className={styles.chips}>
+                    {CHIPS.map((chip) => (
+                        <button
+                            key={chip}
+                            type="button"
+                            className={`${styles.chip} ${activeChip === chip ? styles.active : ""
+                                }`}
+                            onClick={() => handleChipClick(chip)}
+                        >
+                            {chip}
+                        </button>
+                    ))}
+                </div>
+
+                <div className={styles.courseList}>
+                    {loading && <p>Loading courses...</p>}
+                    {error && <p>{error}</p>}
+
+                    {!loading &&
+                        !error &&
+                        courses?.map((course) => (
+                            <CourseCard
+                                key={course._id}
+                                course={course}
+                                onTogglePlan={togglePlan}
+                            />
+                        ))}
+
+                    {!loading && !error && courses.length === 0 && (
+                        <div>
+                            <p>No results found.</p>
                         </div>
-
-                        {/* Results count WIP
-                        => Too lazy to create separate className
-                        */}
-                        {/* <div style={{ marginBottom: 12, fontSize: 14, color: "#555" }}>
-                            <span style={{ color: "#c8102e", fontWeight: 600 }}>{courses?.length} courses found</span>
-                            {totalActive > 0 && (
-                                <> | <span className={styles.filterActive}>{totalActive} filter{totalActive > 1 ? "s" : ""} active</span></>
-                            )}
-                        </div> */}
-
-                        {/* Search => Not using InputField component for more precise styling */}
-                        <input
-                            className={styles.searchBox}
-                            placeholder="Search by course code, title, keyword, or instructor..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-
-                        {/* Chips */}
-                        <div className={styles.chips}>
-                            {CHIPS.map(chip => (
-                                <div
-                                    key={chip}
-                                    className={`${styles.chip} ${activeChip === chip ? "active" : ""}`}
-                                    onClick={() => setChip(chip)}
-                                >
-                                    {chip}
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Course list */}
-                        <div className={styles.courseList}>
-                            {courses?.map(course => (
-                                <CourseCard key={course._id} course={course} onTogglePlan={togglePlan} />
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Filters */}
-                    {/* <FiltersPanel filters={filters} onToggle={toggleFilter} /> */}
+                    )}
                 </div>
             </div>
-        </>
+        </div>
     );
+};
+
+export const CourseCatalogueView = () => {
+    return (
+        <div className={styles.container}>
+            <Sidebar />
+            <CourseCatalogue />
+        </div>
+
+    )
 }
