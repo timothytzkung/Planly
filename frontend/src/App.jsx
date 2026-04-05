@@ -11,7 +11,9 @@ import { LandingView } from "./views/LandingView";
 import { AuthView } from "./views/AuthView";
 import { DashboardView } from "./views/DashboardView";
 import { CourseCatalogueView } from "./views/CourseCatalogueView";
-import { DegreePlannerView } from "./views/DegreePlannerView";
+import { DegreeView } from "./views/DegreeView";
+import { CourseDetailsView } from "./views/CourseDetailsView";
+import { PlannerView } from "./views/PlannerView";
 
 import { DegreePlanner } from "./components/DegreePlanner"
 
@@ -23,7 +25,7 @@ function App() {
   }, [])
 
   const BACK_PORT = 5050;
-
+  
   return (
     <div className="App">
       <AuthProvider>
@@ -51,10 +53,26 @@ function App() {
               }
             />
             <Route
+              path="/courses/:courseCode"
+              element={
+                <ProtectedRoute>
+                  <CourseDetailsView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/degree"
               element={
                 <ProtectedRoute>
-                  <DegreePlannerView/>
+                  <DegreeView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/planner"
+              element={
+                <ProtectedRoute>
+                  <PlannerView />
                 </ProtectedRoute>
               }
             />

@@ -90,16 +90,12 @@
 .navItem:hover {
     background: #fef5f5;
     color: #d0202e;
-}
-
-.navItem.active {
+  }
+  
+  .active {
     background: #fde8ea;
     color: #d0202e;
-}
-
-.navItem.active .navIcon {
-    color: #d0202e;
-}
+  }
 
 .navIcon {
     width: 22px;
