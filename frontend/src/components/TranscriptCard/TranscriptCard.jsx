@@ -1,6 +1,40 @@
 import { useState, useMemo } from 'react';
 import styles from './TranscriptCard.module.css';
 
+const GRADE_POINTS = {
+    'A+': 4.33, 'A': 4.0, 'A-': 3.67,
+    'B+': 3.33, 'B': 3.0, 'B-': 2.67,
+    'C+': 2.33, 'C': 2.0, 'C-': 1.67,
+    'D': 1.0, 'F': 0.0
+};
+
+const parseTimelineEntries = (timeline) => {
+    if (!timeline) return [];
+    if (timeline instanceof Map) {
+        return Array.from(timeline.entries());
+    }
+    return Object.entries(timeline);
+};
+
+const computeSemesterGPA = (grades) => {
+    if (!grades || grades.length === 0) return 0;
+    const points = grades
+        .map((grade) => GRADE_POINTS[grade])
+        .filter((value) => typeof value === 'number');
+    if (points.length === 0) return 0;
+    return points.reduce((sum, value) => sum + value, 0) / points.length;
+};
+
+const sortSemesterTerms = (terms) => {
+    const seasonOrder = { Winter: 0, Spring: 1, Summer: 2, Fall: 3 };
+    return terms.sort((a, b) => {
+        const [yearA, seasonA] = a.term.split(' ');
+        const [yearB, seasonB] = b.term.split(' ');
+        if (yearA !== yearB) return parseInt(yearA) - parseInt(yearB);
+        return (seasonOrder[seasonA] ?? 4) - (seasonOrder[seasonB] ?? 4);
+    });
+};
+
 export const TranscriptCard = ({ summary }) => {
     const [activeSemester, setActiveSemester] = useState('All');
 
@@ -18,39 +52,55 @@ export const TranscriptCard = ({ summary }) => {
 
         const gpaData = summary.gpa;
         const summaryData = summary.summary;
+        const timelineEntries = parseTimelineEntries(summary.timeline);
 
-        // Get semester data from byTerm (Map structure)
-        const semesters = [];
-        if (gpaData.byTerm) {
-            // Convert Map to array of semester objects
-            for (const [term, termData] of Object.entries(gpaData.byTerm)) {
-                // Parse term data (format: "gpa:credits:courses")
-                const [gpa, credits, courses] = termData.split(':').map(val => parseFloat(val) || 0);
-                semesters.push({
-                    term,
-                    gpa,
-                    credits,
-                    courses: parseInt(courses) || 0
-                });
-            }
-        }
+        const semesters = timelineEntries.map(([term, termData]) => {
+            const courseList = termData?.courses || [];
+            const gpa = computeSemesterGPA(termData?.averageGrade || courseList.map(c => c.grade));
+            return {
+                term,
+                courses: courseList,
+                credits: termData?.totalCredits || 0,
+                completedCredits: termData?.completedCredits || 0,
+                gpa,
+                coursesCount: courseList.length
+            };
+        });
 
         return {
             totalCredits: summaryData?.creditsCompleted || gpaData.overall?.credits || 0,
             gpa: gpaData.overall?.gpa || 0,
             completedCourses: gpaData.overall?.courses || 0,
             inProgressCourses: summaryData?.creditsInProgress || 0,
-            semesters: semesters.sort((a, b) => a.term.localeCompare(b.term)) // Sort by term
+            semesters: sortSemesterTerms(semesters)
         };
     }, [summary]);
 
-    // Get grade color (simplified since we don't have individual grades)
-    const getGradeColor = (gpa) => {
-        if (gpa >= 3.7) return 'gradeA';
-        if (gpa >= 3.0) return 'gradeB';
-        if (gpa >= 2.0) return 'gradeC';
-        if (gpa >= 1.0) return 'gradeD';
-        return 'gradeF';
+    const filteredCourses = useMemo(() => {
+        if (activeSemester === 'All') {
+            return statistics.semesters.flatMap((semester) =>
+                semester.courses.map((course) => ({ ...course, term: semester.term }))
+            );
+        }
+        const semester = statistics.semesters.find((s) => s.term === activeSemester);
+        return semester ? semester.courses.map((course) => ({ ...course, term: semester.term })) : [];
+    }, [activeSemester, statistics]);
+
+    const selectedSemester = useMemo(() => {
+        if (activeSemester === 'All') return null;
+        return statistics.semesters.find((s) => s.term === activeSemester) || null;
+    }, [activeSemester, statistics]);
+
+    // Get grade color
+    const getGradeColor = (grade) => {
+        if (!grade) return '';
+        const firstChar = grade.charAt(0).toLowerCase();
+        if (['a'].includes(firstChar)) return 'gradeA';
+        if (firstChar === 'b') return 'gradeB';
+        if (firstChar === 'c') return 'gradeC';
+        if (firstChar === 'd') return 'gradeD';
+        if (firstChar === 'f') return 'gradeF';
+        return '';
     };
 
     if (!summary) {
@@ -133,32 +183,46 @@ export const TranscriptCard = ({ summary }) => {
                     ))}
                 </div>
 
-                {/* Semester Table */}
-                {statistics.semesters.length > 0 ? (
-                    <table className={styles.coursesTable}>
-                        <thead>
-                            <tr>
-                                <th>Semester</th>
-                                <th>GPA</th>
-                                <th>Credits</th>
-                                <th>Courses</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {(activeSemester === 'All' ? statistics.semesters : statistics.semesters.filter(s => s.term === activeSemester)).map((semester) => (
-                                <tr key={semester.term}>
-                                    <td className={styles.courseCode}>{semester.term}</td>
-                                    <td>
-                                        <span className={`${styles.gradeChip} ${styles[getGradeColor(semester.gpa)]}`}>
-                                            {semester.gpa.toFixed(2)}
-                                        </span>
-                                    </td>
-                                    <td>{semester.credits}</td>
-                                    <td>{semester.courses}</td>
+                {(activeSemester === 'All' || selectedSemester) ? (
+                    <>
+                        {selectedSemester && (
+                            <div className={styles.sectionHeader} style={{ marginTop: '16px' }}>
+                                <div className={styles.sectionTitle}>{selectedSemester.term} Summary</div>
+                                <div className={styles.courseCount}>
+                                    {selectedSemester.coursesCount} courses | {selectedSemester.credits} credits | GPA {selectedSemester.gpa.toFixed(2)}
+                                </div>
+                            </div>
+                        )}
+
+                        <table className={styles.coursesTable}>
+                            <thead>
+                                <tr>
+                                    <th>Course Code</th>
+                                    <th>Title</th>
+                                    <th>Credits</th>
+                                    <th>Grade</th>
+                                    <th>Status</th>
+                                    <th>Term</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {filteredCourses.map((course, idx) => (
+                                    <tr key={`${course.term}-${course.code || course.faculty}-${idx}`}>
+                                        <td className={styles.courseCode}>{course.code || `${course.faculty} ${course.courseNumber}`}</td>
+                                        <td className={styles.courseTitle}>{course.name || course.courseName}</td>
+                                        <td>{course.credits}</td>
+                                        <td>
+                                            <span className={`${styles.gradeChip} ${styles[getGradeColor(course.grade)]}`}>
+                                                {course.grade || 'N/A'}
+                                            </span>
+                                        </td>
+                                        <td>{course.status}</td>
+                                        <td>{course.term}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </>
                 ) : (
                     <div className={styles.emptyState}>
                         <div className={styles.emptyStateIcon}>📚</div>
