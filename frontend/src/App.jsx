@@ -14,8 +14,7 @@ import { CourseCatalogueView } from "./views/CourseCatalogueView";
 import { DegreeView } from "./views/DegreeView";
 import { CourseDetailsView } from "./views/CourseDetailsView";
 import { PlannerView } from "./views/PlannerView";
-
-import { DegreePlanner } from "./components/DegreePlanner"
+import { AdminView } from "./views/AdminView";
 
 function App() {
   const [mounted, setMounted] = useState(false);
@@ -77,12 +76,10 @@ function App() {
               }
             />
             <Route
-              path="devdash"
+              path="/admin"
               element={
                 <ProtectedRoute adminOnly={true}>
-                  <DegreePlanner />
-                  <PdfUploadPage />
-                  <SFUCoursesPage />
+                  <AdminView />
                 </ProtectedRoute>
               }
             />
