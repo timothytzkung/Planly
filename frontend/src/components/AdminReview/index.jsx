@@ -1,103 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 
-const initialReviews = [
-  {
-    id: 1,
-    course: "IAT 103W",
-    student: "T. Dukay-Remulta",
-    studentId: "301394116",
-    rating: 5,
-    date: "Mar 12, 2026",
-    status: "visible",
-    flagged: false,
-    review: "One of the best courses in the SIAT program. The instructor explained visual encoding really clearly and the projects were engaging.",
-    expanded: true,
-  },
-  {
-    id: 2,
-    course: "IAT 103W",
-    student: "T. Dukay-Remulta",
-    studentId: "301394116",
-    rating: 5,
-    date: "Mar 12, 2026",
-    status: "visible",
-    flagged: false,
-    review: null,
-    expanded: false,
-  },
-  {
-    id: 3,
-    course: "IAT 103W",
-    student: "T. Dukay-Remulta",
-    studentId: "301394116",
-    rating: 5,
-    date: "Mar 12, 2026",
-    status: "visible",
-    flagged: true,
-    review: "This review contains inappropriate language that was removed by admin.",
-    expanded: true,
-  },
-  {
-    id: 4,
-    course: "IAT 103W",
-    student: "T. Dukay-Remulta",
-    studentId: "301394116",
-    rating: 4,
-    date: "Mar 12, 2026",
-    status: "visible",
-    flagged: false,
-    review: null,
-    expanded: false,
-  },
-  {
-    id: 5,
-    course: "IAT 210",
-    student: "M. Ramirez",
-    studentId: "301221847",
-    rating: 3,
-    date: "Mar 10, 2026",
-    status: "hidden",
-    flagged: true,
-    review: "Content was okay but lectures moved too fast.",
-    expanded: false,
-  },
-  {
-    id: 6,
-    course: "IAT 265",
-    student: "S. Nguyen",
-    studentId: "301508230",
-    rating: 2,
-    date: "Mar 8, 2026",
-    status: "visible",
-    flagged: false,
-    review: "Assignments were unclear and feedback was slow.",
-    expanded: false,
-  },
-  {
-    id: 7,
-    course: "IAT 320",
-    student: "J. Park",
-    studentId: "301677412",
-    rating: 4,
-    date: "Mar 5, 2026",
-    status: "visible",
-    flagged: false,
-    review: "Great mix of theory and hands-on prototyping.",
-    expanded: false,
-  },
-  {
-    id: 8,
-    course: "IAT 445",
-    student: "A. Okonkwo",
-    studentId: "301733001",
-    rating: 3,
-    date: "Mar 3, 2026",
-    status: "visible",
-    flagged: false,
-    review: null,
-    expanded: false,
-  },
-];
+import { AuthContext } from '../../context/AuthContext';
 
 const StarRating = ({ rating }) => (
   <span style={{ color: "#1a1a1a", letterSpacing: 1 }}>
@@ -108,22 +11,57 @@ const StarRating = ({ rating }) => (
 );
 
 export const AdminReview = () => {
-  const [reviews, setReviews] = useState(initialReviews);
+  const [reviews, setReviews] = useState([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [ratingFilter, setRatingFilter] = useState("All Ratings");
   const [viewFlagged, setViewFlagged] = useState(false);
 
+  const { token, backport } = useContext(AuthContext);
+
   const updateReview = (id, patch) =>
     setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
 
-  const deleteReview = (id) => setReviews((prev) => prev.filter((r) => r.id !== id));
+  const deleteReview = async (id) => {
+  
+
+    try {
+      console.log("Attempting to delete...")
+      const res = await fetch(`http://localhost:${backport}/api/sfuCourses/reviews/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: token,
+        },
+      });
+
+      // if (!res.ok) throw new Error();
+    } catch (err) {
+      console.error("Delete failed, reverting...", err);
+      // optionally re-fetch or restore state
+    }
+    // remove from UI
+    setReviews((prev) => prev.filter((r) => r.id !== id));
+  };
 
   const flaggedCount = reviews.filter((r) => r.flagged).length;
   const hiddenCount = reviews.filter((r) => r.status === "hidden").length;
   const avgRating = reviews.length
     ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
     : "0.0";
+
+  const fetchCourses = async () => {
+    try {
+      const res = await fetch(`http://localhost:${backport}/api/sfuCourses/reviews/all`);
+      if (res.ok) {
+        const result = await res.json();
+        console.log(result)
+        return result;
+      }
+    } catch (e) {
+      console.log("Error fetching reviews :(")
+      return [];
+    }
+  }
 
   const filtered = reviews.filter((r) => {
     const q = search.toLowerCase();
@@ -144,6 +82,14 @@ export const AdminReview = () => {
     return matchSearch && matchStatus && matchRating && matchFlagged;
   });
 
+  useEffect(() => {
+    const handleFetchCourses = async () => {
+      const res = await fetchCourses();
+      setReviews(res);
+    }
+    handleFetchCourses();
+  }, [])
+
   const styles = {
     page: {
       fontFamily: "'DM Sans', 'Helvetica Neue', sans-serif",
@@ -151,7 +97,8 @@ export const AdminReview = () => {
       minHeight: "100vh",
       padding: "32px 40px",
       color: "#111827",
-      maxWidth: 1100,
+      minWidth: "80%",
+      maxWidth: "100%",
       margin: "0 auto",
     },
     title: {
