@@ -42,7 +42,6 @@
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
-    font-family: inherit;
 }
 
 .btnUpload:hover {
@@ -59,7 +58,6 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    font-family: inherit;
 }
 
 .btnReParse:hover {
