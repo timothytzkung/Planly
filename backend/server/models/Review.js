@@ -22,6 +22,10 @@ const ReviewSchema = new mongoose.Schema({
     },
     date: {
         type: String
+    },
+    flagged: {
+        type: Boolean,
+        default: false
     }
 });
 
