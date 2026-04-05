@@ -3,10 +3,6 @@ import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./wrappers/ProtectedRoute";
 
-import { PdfUploadPage } from "./views/test/PdfUploadPage";
-import { SFUCoursesPage } from "./views/test/SFUCoursesPage";
-import { TestCataloguePage } from "./views/test/TestCataloguePage";
-
 import { LandingView } from "./views/LandingView";
 import { AuthView } from "./views/AuthView";
 import { DashboardView } from "./views/DashboardView";
@@ -23,8 +19,6 @@ function App() {
   useEffect(() => {
     setMounted(true);
   }, [])
-
-  const BACK_PORT = 5050;
   
   return (
     <div className="App">

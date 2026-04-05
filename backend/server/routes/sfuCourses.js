@@ -158,6 +158,53 @@ router.get("/available-courses", async (req, res) => {
   }
 });
 
+// Add Favourite Courses
+router.post("/favourites/:courseId", verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.id; // assuming verifyToken attaches user info
+    const { courseId } = req.params;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $addToSet: { favourites: courseId } },
+      { new: true }
+    ).populate("favourites");
+
+    res.status(200).json(updatedUser.favourites);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to add favourite course." });
+  }
+});
+
+// Remove a course from favourites
+router.delete("/favourites/:courseId", verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { courseId } = req.params;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { favourites: courseId } },
+      { new: true }
+    ).populate("favourites");
+
+    res.status(200).json(updatedUser.favourites);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to remove favourite course." });
+  }
+});
+
+// Get all favourite courses
+router.get("/favourites", verifyToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate("favourites");
+
+    res.status(200).json(user.favourites);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch favourite courses." });
+  }
+});
+
 // Makes a schedule based off incoming course codes
 router.post("/make-schedule", async (req, res) => {
   try {
