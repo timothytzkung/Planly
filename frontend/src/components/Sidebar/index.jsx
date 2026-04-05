@@ -1,5 +1,5 @@
 import { useState, useContext } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import logo from "../../assets/logo.svg"
 
 // Import styles
@@ -10,7 +10,6 @@ import { SecondaryButton } from "../SecondaryButton";
 
 // Context
 import { AuthContext } from "../../context/AuthContext";
-
 
 // Temporary icons before using matUI
 const HomeIcon = () => (
@@ -64,72 +63,67 @@ const navItems = [
   { id: "transcript", label: "Transcript", icon: <TranscriptIcon /> },
 ];
 
-
-// Temp hard code in values
 export const Sidebar = () => {
-  const [active, setActive] = useState("home");
-  // Destructure to use contexts
   const { token, user, logout } = useContext(AuthContext);
-
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
-    <>
-      <div className={styles.sidebar}>
-        <div className={styles.accentBar}/>
+    <div className={styles.sidebar}>
+      <div className={styles.accentBar} />
 
-        {/* Profile */}
-        <div className={styles.profile}>
-          <div className={styles.avatar}>TD</div>
-          <div className={styles.profileInfo}>
-            <h2 className={styles.profileInfoH2}>{user?.name || "Guest"}</h2>
-            <span className={styles.profileInfoSpan}> SIAT Major | BSc</span>
-            <button className={styles.logoutBtn} onClick={logout}>Logout</button>
-          </div>
-          
+      <div className={styles.profile}>
+        <div className={styles.avatar}>TD</div>
+        <div className={styles.profileInfo}>
+          <h2 className={styles.profileInfoH2}>{user?.name || "Guest"}</h2>
+          <span className={styles.profileInfoSpan}>SIAT Major | BSc</span>
+          <button className={styles.logoutBtn} onClick={logout}>
+            Logout
+          </button>
         </div>
-        
+      </div>
 
-        {/* Navigation */}
-        <nav className={styles.nav}>
-          {navItems.map(item => (
+      <nav className={styles.nav}>
+        {navItems.map((item) => {
+          const isActive = location.pathname === `/${item.id}`;
+
+          return (
             <button
               key={item.id}
-              className={`${styles.navItem} ${active === item.id ? styles.active : ""}`}
-              onClick={() => {
-                setActive(item.id)
-                navigate(`/${item.id}`);
-              }}
+              className={`${styles.navItem} ${isActive ? styles.active : ""}`}
+              onClick={() => navigate(`/${item.id}`)}
             >
               {item.icon}
               {item.label}
             </button>
-          ))}
-        </nav>
+          );
+        })}
+      </nav>
 
-        {/* Academic Advisor */}
-        <div className={styles.advisorSection}>
-          <div className={styles.advisorHeader}>
-            <div className={styles.advisorAvatar}>AA</div>
-            <h3>Academic<br/>Advisor</h3>
-          </div>
-          <ul className={styles.advisorLinks}>
-            <li>Book appointment</li>
-            <li className={styles.muted}>Send message</li>
-            <li className={styles.muted}>View notes</li>
-            <li className={styles.muted}>Resources</li>
-          </ul>
-          
+      <div className={styles.advisorSection}>
+        <div className={styles.advisorHeader}>
+          <div className={styles.advisorAvatar}>AA</div>
+          <h3>
+            Academic
+            <br />
+            Advisor
+          </h3>
         </div>
-
-        {/* Logo */}
-        <div className={styles.logo}>
-        <img src={logo} style={{
-                    width: "70px",
-                    height: "70px"
-                }}/>
-        </div>
+        <ul className={styles.advisorLinks}>
+          <li>Book appointment</li>
+          <li className={styles.muted}>Send message</li>
+          <li className={styles.muted}>View notes</li>
+          <li className={styles.muted}>Resources</li>
+        </ul>
       </div>
-    </>
+
+      <div className={styles.logo}>
+        <img
+          src={logo}
+          alt="Logo"
+          style={{ width: "70px", height: "70px" }}
+        />
+      </div>
+    </div>
   );
-}
+};

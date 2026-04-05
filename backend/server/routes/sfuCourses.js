@@ -3,7 +3,9 @@ const express = require("express");
 const router = express.Router();
 const WQBCourse = require("../models/wqbCourse");
 const CourseSection = require("../models/CourseSection");
+const Review = require("../models/Review")
 const { GenerateSchedule } = require("../controllers/scheduleGenerator");
+const {verifyToken} = require("../middleware/authMiddleware");
 
 // SFU API courses in dept. route (req includes => {year, term, department })
 router.post("/courses", async (req, res) => {
@@ -160,7 +162,6 @@ router.get("/available-courses", async (req, res) => {
 router.post("/make-schedule", async (req, res) => {
   try {
     const { courses } = req.body;
-    console.log(courses)
 
     if (!Array.isArray(courses) || courses.length === 0) {
       return res.status(400).json({
@@ -193,10 +194,7 @@ router.post("/make-schedule", async (req, res) => {
         missingCourses,
       });
     }
-    console.log(validCourses)
-    console.log(foundCourses)
     const schedule = GenerateSchedule(validCourses);
-    console.log(schedule)
 
     return res.status(200).json({
       schedule,
@@ -207,6 +205,57 @@ router.post("/make-schedule", async (req, res) => {
     return res.status(500).json({
       error: e.message || "Internal server error",
     });
+  }
+});
+
+// Post a review
+router.post("/review", async (req, res) => {
+  console.log("Review backend pinged!");
+  console.log("req.body:", req.body);
+
+  const { userId, text, rating, courseCode, date } = req.body;
+
+  if (!userId || !text || rating == null || !courseCode) {
+    return res.status(400).json({
+      message: "Missing required fields",
+    });
+  }
+
+  try {
+    const newReview = new Review({
+      owner: userId,
+      courseCode,
+      rating,
+      text,
+      date,
+    });
+
+    await newReview.save();
+
+    return res.status(200).json({
+      message: "Review saved!",
+      review: newReview,
+    });
+  } catch (err) {
+    console.error("Save error:", err);
+    return res.status(400).json({
+      message: "Error saving post",
+      error: err.message,
+    });
+  }
+});
+
+
+// Get all reviews for some course
+router.get("/reviews", async (req, res) => {
+  try {
+    const { courseCode } = req.query;
+    const _reviews = await Review.find({ courseCode: courseCode });
+
+    res.status(200).json({ reviews: _reviews });
+  } catch (e) {
+    console.log("Error fetching reviews: ", e);
+    res.status(500).json({ error: e });
   }
 });
 

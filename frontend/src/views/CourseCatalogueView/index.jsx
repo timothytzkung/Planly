@@ -2,14 +2,22 @@
 import styles from './CourseCatalogueView.module.css'
 import { useState, useEffect } from 'react';
 import { Sidebar } from "../../components/Sidebar"
+import { useNavigate } from "react-router-dom";
 
 const CourseCard = ({ course, onTogglePlan }) => {
+    // Navigation for course details view
+    const navigate = useNavigate();
+
+    const handleClick = () => {
+        navigate(`/courses/${course.courseCode}`, { state: { course } })
+    };
+    
     // Returns card component for displaying course
     return (
         <div className={styles.courseCard}>
             <div className={styles.courseBadge}>{course.type}</div>
             <div className={styles.courseBody}>
-                <div className={styles.cardTitleRow}>
+                <div className={styles.cardTitleRow} onClick={handleClick}>
                     <span className={styles.cardCode}>{course.courseCode}</span>
                     <span className={styles.cardName}>{course.courseTitle}</span>
                 </div>

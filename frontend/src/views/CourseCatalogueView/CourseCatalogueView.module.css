@@ -168,6 +168,7 @@
     align-items: baseline;
     gap: 8px;
     margin-bottom: 8px;
+    cursor: pointer;
 }
 
 .cardCode {
