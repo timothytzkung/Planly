@@ -24,8 +24,10 @@ body {
 }
 
 .container {
-    max-width: 860px;
+
+    max-width: 1260px;
     margin: 0 auto;
+    margin-top: 2rem;
     padding: 2.5rem 1.5rem;
 }
 
@@ -37,7 +39,7 @@ body {
 }
 
 .degreeHeaderLeft h1 {
-    font-size: 24px;
+    font-size: 2rem;
     font-weight: 700;
     letter-spacing: -0.5px;
 }

@@ -20,6 +20,11 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    favourites: [
+        {   type: mongoose.Schema.Types.ObjectId,
+            ref: "CourseSection",
+        }
+    ],
     role: {
         type: String, 
         enum: ['member', 'admin'], // Guarantees that only these specific values can be saved

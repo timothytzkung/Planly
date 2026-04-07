@@ -195,8 +195,8 @@ export const DegreePlanner = ({ summary }) => {
         bachelor: "#1D9E75",
     };
 
-    // Debug for schema visibility
-    console.log(summary)
+    // // Debug for schema visibility
+    // console.log(summary)
 
     return (
         <>

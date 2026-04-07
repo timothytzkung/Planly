@@ -46,10 +46,10 @@ const RatingBar = ({ star, count, max }) => (
 
 const Badge = ({ children, variant = "default" }) => {
   const styles = {
-    default: { background: "#F3F4F6", color: "#374151", border: "1px solid #E5E7EB" },
+    default: { background: "#c8102e", color: "#fff", border: "1px solid #E5E7EB" },
     primary: { background: "#FEF3C7", color: "#92400E", border: "1px solid #FDE68A" },
     green: { background: "#D1FAE5", color: "#065F46", border: "1px solid #A7F3D0" },
-    blue: { background: "#DBEAFE", color: "#1E40AF", border: "1px solid #BFDBFE" },
+    grey: { background: "#ebebeb", color: "#000", border: "1px solid #BFDBFE" },
   };
   return (
     <span
@@ -225,10 +225,11 @@ export const CourseDetails = () => {
           {/* Badges */}
           <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
             {designation && <Badge variant="primary">{designation}</Badge>}
+            {units && <Badge variant="default">{campus}</Badge>}
             {delivery && <Badge variant="green">{delivery}</Badge>}
-            {units && <Badge>{campus}</Badge>}
-            {units && <Badge>{units} credits</Badge>}
-            {term && <Badge variant="blue">{term}</Badge>}
+            {units && <Badge variant="grey">{section}</Badge>}
+            {term && <Badge variant="grey">{term}</Badge>}
+            {units && <Badge variant="grey">{units} credits</Badge>}
           </div>
         </div>
 
@@ -248,21 +249,6 @@ export const CourseDetails = () => {
             <StarRow rating={avgRating} />
             <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 2 }}>{reviewCount} reviews</div>
           </div>
-          <button
-            style={{
-              background: "#DC2626",
-              color: "#fff",
-              border: "none",
-              borderRadius: 8,
-              padding: "10px 20px",
-              fontSize: 14,
-              fontWeight: 600,
-              cursor: "pointer",
-              letterSpacing: "0.01em",
-            }}
-          >
-            + Plan
-          </button>
         </div>
       </div>
 
