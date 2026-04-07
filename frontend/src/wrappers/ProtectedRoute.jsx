@@ -14,7 +14,6 @@ function ProtectedRoute({ children, adminOnly = false }) {
     // <Navigate /> renders a redirect instantly without the user doing anything
     return <Navigate to="/" />;
   }
-
   // Check for admin only routes
   if (adminOnly && user?.role !== "admin") {
     return <Navigate to="/dashboard" />;

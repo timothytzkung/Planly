@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./wrappers/ProtectedRoute";
+import DashboardRedirect from "./wrappers/DashboardRedirect"
 
 import { PdfUploadPage } from "./views/test/PdfUploadPage";
 import { SFUCoursesPage } from "./views/test/SFUCoursesPage";
@@ -11,10 +12,10 @@ import { LandingView } from "./views/LandingView";
 import { AuthView } from "./views/AuthView";
 import { DashboardView } from "./views/DashboardView";
 import { CourseCatalogueView } from "./views/CourseCatalogueView";
-import { DegreePlannerView } from "./views/DegreePlannerView";
-import { TranscriptView } from "./views/TranscriptView";
-
-import { DegreePlanner } from "./components/DegreePlanner"
+import { DegreeView } from "./views/DegreeView";
+import { CourseDetailsView } from "./views/CourseDetailsView";
+import { PlannerView } from "./views/PlannerView";
+import { AdminView } from "./views/AdminView";
 
 function App() {
   const [mounted, setMounted] = useState(false);
@@ -24,7 +25,7 @@ function App() {
   }, [])
 
   const BACK_PORT = 5050;
-
+  
   return (
     <div className="App">
       <AuthProvider>
@@ -38,10 +39,13 @@ function App() {
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <DashboardView />
+                  <DashboardRedirect>
+                    <DashboardView />
+                  </DashboardRedirect>
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/course-catalogue"
               element={
@@ -51,28 +55,34 @@ function App() {
               }
             />
             <Route
+              path="/courses/:courseCode"
+              element={
+                <ProtectedRoute>
+                  <CourseDetailsView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/degree"
               element={
                 <ProtectedRoute>
-                  <DegreePlannerView/>
+                  <DegreeView />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/transcript"
+              path="/planner"
               element={
                 <ProtectedRoute>
-                  <TranscriptView />
+                  <PlannerView />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="devdash"
+              path="/admin"
               element={
-                <ProtectedRoute>
-                  <DegreePlanner />
-                  <PdfUploadPage />
-                  <SFUCoursesPage />
+                <ProtectedRoute adminOnly={true}>
+                  <AdminView />
                 </ProtectedRoute>
               }
             />

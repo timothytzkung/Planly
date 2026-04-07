@@ -243,7 +243,7 @@ const SummarySchema = new Schema({
         }, { _id: false })
     }
 }, {
-    timestamps: true // Highly recommended to track when these summaries are created/updated
+    timestamps: true
 });
 
 module.exports = mongoose.model('Summary', SummarySchema, "summaries");

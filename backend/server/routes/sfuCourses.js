@@ -3,7 +3,10 @@ const express = require("express");
 const router = express.Router();
 const WQBCourse = require("../models/wqbCourse");
 const CourseSection = require("../models/CourseSection");
+const Review = require("../models/Review");
+const User = require("../models/User");
 const { GenerateSchedule } = require("../controllers/scheduleGenerator");
+const {verifyToken} = require("../middleware/authMiddleware");
 
 // SFU API courses in dept. route (req includes => {year, term, department })
 router.post("/courses", async (req, res) => {
@@ -203,6 +206,99 @@ router.post("/make-schedule", async (req, res) => {
     return res.status(500).json({
       error: e.message || "Internal server error",
     });
+  }
+});
+
+// Post a review
+router.post("/review", async (req, res) => {
+  const { userId, text, rating, courseCode, date } = req.body;
+
+  if (!userId || !text || rating == null || !courseCode) {
+    return res.status(400).json({
+      message: "Missing required fields",
+    });
+  }
+
+  try {
+    const newReview = new Review({
+      owner: userId,
+      courseCode,
+      rating,
+      text,
+      date,
+    });
+
+    await newReview.save();
+
+    return res.status(200).json({
+      message: "Review saved!",
+      review: newReview,
+    });
+  } catch (err) {
+    console.error("Save error:", err);
+    return res.status(400).json({
+      message: "Error saving post",
+      error: err.message,
+    });
+  }
+});
+
+
+// Get all reviews for some course
+router.get("/reviews", async (req, res) => {
+  try {
+    const { courseCode } = req.query;
+    const _reviews = await Review.find({ courseCode: courseCode });
+
+    res.status(200).json({ reviews: _reviews });
+  } catch (e) {
+    console.log("Error fetching reviews: ", e);
+    res.status(500).json({ error: e });
+  }
+});
+
+// Get all reviews irrespective of courses (for admin view)
+router.get("/reviews/all", async (req, res) => {
+  try {
+    const reviews = await Review.find()
+      .populate("owner", "name studentID")
+      .lean();
+
+    const formattedReviews = reviews.map((review, index) => ({
+      id: review._id.toString(), // better than fake numeric ids
+      course: review.courseCode,
+      student: review.owner?.name || "Unknown User",
+      studentId: review.owner?.studentID || "",
+      rating: review.rating,
+      date: review.date || "",
+      status: "visible", // frontend-only default
+      flagged: review.flagged ?? false,
+      review: review.text,
+      expanded: false, // frontend UI state default
+    }));
+
+    res.json(formattedReviews);
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    res.status(500).json({ message: "Failed to fetch reviews" });
+  }
+});
+
+// Delete review
+router.delete("/reviews/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deleted = await Review.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    res.json({ message: "Review deleted successfully" });
+  } catch (err) {
+    console.error("Delete error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 });
 

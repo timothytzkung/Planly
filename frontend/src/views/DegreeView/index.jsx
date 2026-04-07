@@ -6,10 +6,10 @@
  import { AuthContext } from "../../context/AuthContext";
  import { UserContext } from "../../context/UserContext";
 
- import styles from "./DegreePlanner.module.css"
+ import styles from "./DegreeView.module.css"
 
 
- export const DegreePlannerView = () => {
+ export const DegreeView = () => {
 
     const [summary, setSummary] = useState(null);
     const { backport, user } = useContext(AuthContext);
