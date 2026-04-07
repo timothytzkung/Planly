@@ -75,6 +75,7 @@ const InfoRow = ({ label, value }) => (
     style={{
       display: "flex",
       justifyContent: "space-between",
+      gap:  "2rem",
       alignItems: "center",
       padding: "10px 0",
       borderBottom: "1px solid #F3F4F6",
