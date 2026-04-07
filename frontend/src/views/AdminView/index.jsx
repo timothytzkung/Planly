@@ -1,5 +1,5 @@
 
-import {AdminSidebar} from "../../components/AdminSidebar"
+import {Sidebar} from "../../components/Sidebar"
 import { AdminReview } from "../../components/AdminReview"
 
 export const AdminView = () => {
@@ -9,7 +9,7 @@ export const AdminView = () => {
         <div style={{
             display: "flex"
         }}>
-            <AdminSidebar />
+            <Sidebar />
             <AdminReview />
         </div>
     )

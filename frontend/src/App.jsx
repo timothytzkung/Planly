@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./wrappers/ProtectedRoute";
+import DashboardRedirect from "./wrappers/DashboardRedirect"
 
 import { PdfUploadPage } from "./views/test/PdfUploadPage";
 import { SFUCoursesPage } from "./views/test/SFUCoursesPage";
@@ -39,10 +40,13 @@ function App() {
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <DashboardView />
+                  <DashboardRedirect>
+                    <DashboardView />
+                  </DashboardRedirect>
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/course-catalogue"
               element={

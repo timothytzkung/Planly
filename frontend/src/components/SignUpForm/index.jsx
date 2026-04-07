@@ -33,10 +33,10 @@ export const SignUpForm = () => {
                 // await response
                 const data = await res.json();
                 if (res.ok) {
-                    alert("Registeration sucessful! Please sign in") // placeholder announcement
+                    // alert("Registeration sucessful! Please sign in") // placeholder announcement
                     navigate("/login");
                 } else {
-                    alert(data.message || "Registration Failed") 
+                    // alert(data.message || "Registration Failed") 
                     setSubmitted(false);
                 }
             } catch (err) {
