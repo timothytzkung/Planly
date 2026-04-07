@@ -10,10 +10,11 @@ export const CourseCard = ({
   onTogglePlan,
   canAdd = false,
 }) => {
-  if (!course) return (<></>);
-  
+  if (!course) return <></>;
+
   const navigate = useNavigate();
   const { user, token, backport } = useContext(AuthContext);
+  const [saving, setSaving] = useState(false);
 
   const handleClick = () => {
     navigate(`/courses/${course.courseCode}`, { state: { course } });
@@ -66,10 +67,12 @@ export const CourseCard = ({
   };
 
   const handlePlanClick = async () => {
+    if (saving) return;
+
     const nextPlanned = !isPlanned;
 
-    // instant UI update
     onTogglePlan(course._id, nextPlanned);
+    setSaving(true);
 
     try {
       if (nextPlanned) {
@@ -79,9 +82,9 @@ export const CourseCard = ({
       }
     } catch (e) {
       console.log("Failed to update favourite:", e);
-
-      // rollback UI if API fails
       onTogglePlan(course._id, isPlanned);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -126,11 +129,17 @@ export const CourseCard = ({
 
         {canAdd && (
           <button
-            className={`${styles.btnPlan} ${isPlanned ? styles.btnPlanPlanned : styles.btnPlanAdd
-              }`}
+            className={`${styles.btnPlan} ${
+              isPlanned ? styles.btnPlanPlanned : styles.btnPlanAdd
+            }`}
             onClick={handlePlanClick}
+            disabled={saving}
           >
-            {isPlanned ? "Remove from Plan" : "+ Plan"}
+            {saving
+              ? "Saving..."
+              : isPlanned
+              ? "Remove from Plan"
+              : "+ Plan"}
           </button>
         )}
       </div>
@@ -246,51 +255,8 @@ export const CourseCatalogue = ({ numResults = 7, canAdd }) => {
     }
   }
 
-  const fetchCourses = async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-      });
-
-      if (search.trim()) {
-        params.set("search", search.trim());
-      }
-
-      const chipParams = getChipParams(activeChip);
-      Object.entries(chipParams).forEach(([key, value]) => {
-        params.set(key, value);
-      });
-
-      const res = await fetch(
-        `http://localhost:${BACK_PORT}/api/sfuCourses/available-courses?${params.toString()}`,
-        { method: "GET" }
-      );
-
-      if (!res.ok) {
-        throw new Error("Failed to fetch courses");
-      }
-
-      const data = await res.json();
-
-      setCourses(data.items || []);
-      setTotal(data.total || 0);
-      setTotalPages(data.totalPages || 1);
-    } catch (err) {
-      setError(err.message || "Something went wrong");
-      setCourses([]);
-      setTotal(0);
-      setTotalPages(1);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const fetchFavourites = async () => {
-    if (!user || !token) return;
+    if (!user || !token) return [];
 
     try {
       const res = await fetch(
@@ -316,7 +282,7 @@ export const CourseCatalogue = ({ numResults = 7, canAdd }) => {
       return (data || []).map((fav) => fav._id.toString());
     } catch (e) {
       console.log("Error fetching favourites:", e);
-      return ([]);
+      return [];
     }
   };
 
@@ -380,6 +346,20 @@ export const CourseCatalogue = ({ numResults = 7, canAdd }) => {
     return () => controller.abort();
   }, [page, debouncedSearch, activeChip]);
 
+  useEffect(() => {
+    if (!user || !token) {
+      setFavourites([]);
+      return;
+    }
+
+    const loadFavourites = async () => {
+      const favs = await fetchFavourites();
+      setFavourites(favs);
+    };
+
+    loadFavourites();
+  }, [user, token, backport]);
+
   const handleChipClick = (chip) => {
     setPage(1);
     setActiveChip(chip);
@@ -421,8 +401,9 @@ export const CourseCatalogue = ({ numResults = 7, canAdd }) => {
             <button
               key={chip}
               type="button"
-              className={`${styles.chip} ${activeChip === chip ? styles.active : ""
-                }`}
+              className={`${styles.chip} ${
+                activeChip === chip ? styles.active : ""
+              }`}
               onClick={() => handleChipClick(chip)}
             >
               {chip}
