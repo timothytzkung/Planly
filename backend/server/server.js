@@ -141,6 +141,7 @@ app.post("/api/summary/", async(req, res) => {
   }
 })
 
+
 // API
 app.use("/api/sfuCourses", sfuCourseRoutes);
 app.use("/api/auth", authRoutes);

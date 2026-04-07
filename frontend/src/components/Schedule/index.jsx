@@ -36,17 +36,17 @@ export const Schedule = ({ }) => {
             });
             if (res.ok) {
                 const result = await res.json();
-                console.log(result);
                 return result.schedule;
             }
         } catch (e) {
-            console.log("Error fetching schedule: ", e);
+            // Will throw an error if no schedule being generated
+            // console.log("Error fetching schedule: ", e);
         }
     }
 
     useEffect(() => {
         const handleFetchSchedule = async() => {
-            console.log(currentCourses)
+            // console.log(currentCourses)
             const result = await fetchSchedule();
             setSchedule(result);
         }

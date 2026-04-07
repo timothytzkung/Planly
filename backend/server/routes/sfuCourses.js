@@ -165,8 +165,8 @@ router.post("/make-schedule", async (req, res) => {
     const { courses } = req.body;
 
     if (!Array.isArray(courses) || courses.length === 0) {
-      return res.status(400).json({
-        error: "Request body must include a non-empty 'courses' array",
+      return res.status(204).json({
+        message: "Request body must include a non-empty 'courses' array",
       });
     }
 
@@ -299,6 +299,84 @@ router.delete("/reviews/:id", async (req, res) => {
   } catch (err) {
     console.error("Delete error:", err);
     res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+// Fetch favourites
+router.post("/get-favourites", async(req, res) => {
+  if (!req.body) return res.status(400).json({ error: "No body attached" });
+  try {
+
+    const user = await User.findById(req.body.userId).populate("favourites");
+
+    if (!user) {
+      return res.status(404).json({ message: "No user found" });
+    }
+    res.status(200).json(user.favourites);
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({
+      message: "Internal server error",
+      error: e.message,
+    });
+  }
+})
+
+// Add to favourites
+router.post("/add-favourite", verifyToken, async (req, res) => {
+  const { userId, courseId } = req.body;
+
+  if (!userId || !courseId) {
+    return res.status(400).json({ error: "Missing userId or courseId" });
+  }
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "No user found" });
+    }
+
+    // Prevent duplicates
+    if (!user.favourites.includes(courseId)) {
+      user.favourites.push(courseId);
+      await user.save();
+    }
+
+    res.status(200).json(user.favourites);
+
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({
+      message: "Internal server error",
+      error: e.message,
+    });
+  }
+});
+
+router.post("/remove-favourite", async (req, res) => {
+  const { userId, courseId } = req.body;
+
+  if (!userId || !courseId) {
+    return res.status(400).json({ error: "Missing userId or courseId" });
+  }
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { favourites: courseId } }, // remove from array
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "No user found" });
+    }
+
+    res.status(200).json(updatedUser.favourites);
+
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
