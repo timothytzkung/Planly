@@ -4,10 +4,6 @@ import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./wrappers/ProtectedRoute";
 import DashboardRedirect from "./wrappers/DashboardRedirect"
 
-import { PdfUploadPage } from "./views/test/PdfUploadPage";
-import { SFUCoursesPage } from "./views/test/SFUCoursesPage";
-import { TestCataloguePage } from "./views/test/TestCataloguePage";
-
 import { LandingView } from "./views/LandingView";
 import { AuthView } from "./views/AuthView";
 import { DashboardView } from "./views/DashboardView";
