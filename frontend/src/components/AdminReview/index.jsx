@@ -1,4 +1,10 @@
-import { useState, useEffect, useContext } from "react";
+// CURRENTLY NOT IN USE!
+/* 
+I will rework this if I got time, otherwise, am using conditional
+redirecting for admin (sidebar)
+*/
+
+import { useState, useEffect, useContext, Fragment } from "react";
 
 import { AuthContext } from '../../context/AuthContext';
 
@@ -406,8 +412,8 @@ export const AdminReview = () => {
               </tr>
             )}
             {filtered.map((r) => (
-              <>
-                <tr key={r.id} style={styles.row(r.flagged)}>
+              <Fragment key={r.id}>
+                <tr style={styles.row(r.flagged)}>
                   <td style={styles.td}>
                     <div style={styles.courseName}>{r.course}</div>
                     {r.flagged && (
@@ -481,7 +487,7 @@ export const AdminReview = () => {
                     </td>
                   </tr>
                 )}
-              </>
+              </Fragment>
             ))}
           </tbody>
         </table>
