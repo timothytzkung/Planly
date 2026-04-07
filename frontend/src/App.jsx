@@ -16,6 +16,7 @@ import { DegreeView } from "./views/DegreeView";
 import { CourseDetailsView } from "./views/CourseDetailsView";
 import { PlannerView } from "./views/PlannerView";
 import { AdminView } from "./views/AdminView";
+import { TranscriptView } from "./views/TranscriptView"
 
 function App() {
   const [mounted, setMounted] = useState(false);
@@ -75,6 +76,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <PlannerView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/transcript"
+              element={
+                <ProtectedRoute>
+                  <TranscriptView />
                 </ProtectedRoute>
               }
             />
