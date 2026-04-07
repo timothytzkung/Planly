@@ -10,6 +10,8 @@ export const CourseCard = ({
   onTogglePlan,
   canAdd = false,
 }) => {
+  if (!course) return (<></>);
+  
   const navigate = useNavigate();
   const { user, token, backport } = useContext(AuthContext);
 
@@ -124,9 +126,8 @@ export const CourseCard = ({
 
         {canAdd && (
           <button
-            className={`${styles.btnPlan} ${
-              isPlanned ? styles.btnPlanPlanned : styles.btnPlanAdd
-            }`}
+            className={`${styles.btnPlan} ${isPlanned ? styles.btnPlanPlanned : styles.btnPlanAdd
+              }`}
             onClick={handlePlanClick}
           >
             {isPlanned ? "Remove from Plan" : "+ Plan"}
@@ -212,6 +213,7 @@ export const CourseCatalogue = ({ numResults = 7, canAdd }) => {
   const { user, token, backport } = useContext(AuthContext);
 
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [activeChip, setActiveChip] = useState("All");
   const [courses, setCourses] = useState([]);
   const [favourites, setFavourites] = useState([]);
@@ -314,28 +316,69 @@ export const CourseCatalogue = ({ numResults = 7, canAdd }) => {
       return (data || []).map((fav) => fav._id.toString());
     } catch (e) {
       console.log("Error fetching favourites:", e);
-      return([]);
+      return ([]);
     }
   };
 
   useEffect(() => {
-    const delay = setTimeout(() => {
-      fetchCourses();
-    }, 100);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
 
-    return () => clearTimeout(delay);
-  }, [page, search, activeChip]);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   useEffect(() => {
-    if (!user || !token) return;
-  
-    const handleFetchFavourites = async() => {
-        const res = await fetchFavourites();
-        console.log(res)
-        setFavourites(res);
-    }
-    handleFetchFavourites()
-  }, []);
+    const controller = new AbortController();
+
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const params = new URLSearchParams({
+          page: page.toString(),
+          limit: limit.toString(),
+        });
+
+        if (debouncedSearch.trim()) {
+          params.set("search", debouncedSearch.trim());
+        }
+
+        const chipParams = getChipParams(activeChip);
+        Object.entries(chipParams).forEach(([key, value]) => {
+          params.set(key, value);
+        });
+
+        const res = await fetch(
+          `http://localhost:${BACK_PORT}/api/sfuCourses/available-courses?${params.toString()}`,
+          {
+            method: "GET",
+            signal: controller.signal,
+          }
+        );
+
+        if (!res.ok) throw new Error("Failed to fetch courses");
+
+        const data = await res.json();
+        setCourses(data.items || []);
+        setTotal(data.total || 0);
+        setTotalPages(data.totalPages || 1);
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          setError(err.message || "Something went wrong");
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchCourses();
+
+    return () => controller.abort();
+  }, [page, debouncedSearch, activeChip]);
 
   const handleChipClick = (chip) => {
     setPage(1);
@@ -378,9 +421,8 @@ export const CourseCatalogue = ({ numResults = 7, canAdd }) => {
             <button
               key={chip}
               type="button"
-              className={`${styles.chip} ${
-                activeChip === chip ? styles.active : ""
-              }`}
+              className={`${styles.chip} ${activeChip === chip ? styles.active : ""
+                }`}
               onClick={() => handleChipClick(chip)}
             >
               {chip}
@@ -389,11 +431,10 @@ export const CourseCatalogue = ({ numResults = 7, canAdd }) => {
         </div>
 
         <div className={styles.courseList}>
-          {loading && <p>Loading courses...</p>}
           {error && <p>{error}</p>}
+          {loading && <p>Updating courses...</p>}
 
-          {!loading &&
-            !error &&
+          {!error &&
             courses?.map((course) => (
               <CourseCard
                 key={course._id}
