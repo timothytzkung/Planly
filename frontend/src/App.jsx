@@ -32,7 +32,6 @@ function App() {
         <Router>
           <Routes>
             <Route path="/" element={<LandingView mounted={mounted} />} />
-
             <Route path="/login" element={<AuthView />} />
 
             {/* Protected Routes */}
