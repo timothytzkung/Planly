@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Sidebar } from "../../components/Sidebar"
 import { useNavigate } from "react-router-dom";
 
-const CourseCard = ({ course, onTogglePlan }) => {
+const CourseCard = ({ course, onTogglePlan, canAdd=false }) => {
     // Navigation for course details view
     const navigate = useNavigate();
 
@@ -41,12 +41,14 @@ const CourseCard = ({ course, onTogglePlan }) => {
             </div>
             <div className={styles.cardRight}>
                 <span className={styles.cardCredits}>{course.info.units} Cr</span>
-                <button
+                {
+                    canAdd ?  <button
                     className={`${styles.btnPlan} ${course.planned ? styles.btnPlanPlanned : styles.btnPlanAdd}`}
                     onClick={() => onTogglePlan(course._id)}
                 >
                     {course.planned ? "✓ Planned" : "+ Plan"}
-                </button>
+                </button> : <></>
+                }
             </div>
         </div>
     );
@@ -91,7 +93,7 @@ const FiltersPanel = ({ filters, onToggle }) => {
     );
 }
 
-export const CourseCatalogue = ({ numResults = 7 }) => {
+export const CourseCatalogue = ({ numResults = 7, canAdd }) => {
     const CHIPS = [
         "All",
         "SIAT Core",
@@ -254,6 +256,7 @@ export const CourseCatalogue = ({ numResults = 7 }) => {
                                 key={course._id}
                                 course={course}
                                 onTogglePlan={togglePlan}
+                                canAdd={canAdd}
                             />
                         ))}
 
@@ -268,11 +271,11 @@ export const CourseCatalogue = ({ numResults = 7 }) => {
     );
 };
 
-export const CourseCatalogueView = () => {
+export const CourseCatalogueView = ({ canAdd=true }) => {
     return (
         <div className={styles.container}>
             <Sidebar />
-            <CourseCatalogue />
+            <CourseCatalogue canAdd={true}/>
         </div>
 
     )
