@@ -28,26 +28,24 @@ export const AdminReview = () => {
   const updateReview = (id, patch) =>
     setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
 
-  const deleteReview = async (id) => {
-  
-
-    try {
-      console.log("Attempting to delete...")
-      const res = await fetch(`http://localhost:${backport}/api/sfuCourses/reviews/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: token,
-        },
-      });
-
-      // if (!res.ok) throw new Error();
-    } catch (err) {
-      console.error("Delete failed, reverting...", err);
-      // optionally re-fetch or restore state
-    }
-    // remove from UI
-    setReviews((prev) => prev.filter((r) => r.id !== id));
-  };
+    const deleteReview = async (id) => {
+      try {
+        const res = await fetch(`http://localhost:${backport}/api/sfuCourses/reviews/${id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: token,
+          },
+        });
+    
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.message || "Delete failed");
+        } // Set review
+        setReviews((prev) => prev.filter((r) => r.id !== id));
+      } catch (err) {
+        console.error("Delete failed:", err);
+      }
+    };
 
   const flaggedCount = reviews.filter((r) => r.flagged).length;
   const hiddenCount = reviews.filter((r) => r.status === "hidden").length;

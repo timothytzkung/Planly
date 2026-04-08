@@ -6,7 +6,7 @@ const CourseSection = require("../models/CourseSection");
 const Review = require("../models/Review");
 const User = require("../models/User");
 const { GenerateSchedule } = require("../controllers/scheduleGenerator");
-const {verifyToken} = require("../middleware/authMiddleware");
+const {verifyToken, verifyAdmin} = require("../middleware/authMiddleware");
 
 // SFU API courses in dept. route (req includes => {year, term, department })
 router.post("/courses", async (req, res) => {
@@ -285,7 +285,7 @@ router.get("/reviews/all", async (req, res) => {
 });
 
 // Delete review
-router.delete("/reviews/:id", async (req, res) => {
+router.delete("/reviews/:id", verifyToken, verifyAdmin, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -355,7 +355,7 @@ router.post("/add-favourite", verifyToken, async (req, res) => {
   }
 });
 
-router.post("/remove-favourite", async (req, res) => {
+router.post("/remove-favourite", verifyToken, async (req, res) => {
   const { userId, courseId } = req.body;
 
   if (!userId || !courseId) {
