@@ -27,6 +27,7 @@ const ProgressBar = ({ percent, color }) => {
 };
 
 const OverallProgressCard = ({ creditsDone, completed, inProgress, remaining, total, COLORS }) => {
+    // Calculate percentage of credits done
     const pct = Math.round((creditsDone / total) * 100);
 
     return (
@@ -59,6 +60,7 @@ const OverallProgressCard = ({ creditsDone, completed, inProgress, remaining, to
     );
 };
 
+// Chip styling component
 const Chip = ({ code, status }) => {
     const cls =
         status === "completed"
@@ -103,11 +105,12 @@ const SectionCard = ({
     );
 };
 
-
+// Main degree planner view
 export const DegreePlanner = ({ summary }) => {
 
     const [courses, setCourses] = useState([]);
 
+    // Temporary fallback courses in case fetch failure
     const [LOWER_DIVISION, SET_LOWER_DIVISION] = useState([
         { code: "IAT 100", status: "completed" },
         { code: "IAT 102", status: "completed" },

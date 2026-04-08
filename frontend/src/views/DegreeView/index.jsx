@@ -8,7 +8,7 @@
 
  import styles from "./DegreeView.module.css"
 
-
+ // Component for managing degree view
  export const DegreeView = () => {
 
     const [summary, setSummary] = useState(null);

@@ -17,12 +17,13 @@ import { TranscriptView } from "./views/TranscriptView"
 function App() {
   const [mounted, setMounted] = useState(false);
 
+  // Set mount
   useEffect(() => {
     setMounted(true);
   }, [])
 
-  const BACK_PORT = 5050;
   
+  // Routes
   return (
     <div className="App">
       <AuthProvider>

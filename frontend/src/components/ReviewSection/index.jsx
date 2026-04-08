@@ -2,6 +2,7 @@ import { useState, useContext, useEffect } from "react";
 
 import { AuthContext } from '../../context/AuthContext';
 
+// Hard styling
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
 
@@ -192,6 +193,7 @@ const styles = `
   }
 `;
 
+// Map rating
 const StarRating = ({ rating, onRate }) => {
   const [hovered, setHovered] = useState(0);
 
@@ -221,23 +223,7 @@ const ReviewStars = ({ rating }) => (
   </div>
 );
 
-const initialReviews = [
-  {
-    id: 1,
-    name: "Aaron C.",
-    date: "Feb 12, 2026",
-    rating: 2,
-    text: "Found the grading to be inconsistent and feedback on assignments was vague. The content is interesting but execution felt rushed. Would have liked more structured guidance on the usability report format.",
-  },
-  {
-    id: 2,
-    name: "Maria T.",
-    date: "Jan 28, 2026",
-    rating: 4,
-    text: "Great course overall! The instructor explained concepts clearly and the assignments were practical. A few topics could have been explored more deeply, but I'd recommend it to others.",
-  },
-];
-
+// Review section
 export const ReviewSection = ({ courseCode }) => {
   const backport = 5050;
 
@@ -248,6 +234,7 @@ export const ReviewSection = ({ courseCode }) => {
 
   const { token, user } = useContext(AuthContext);
 
+  // Fetch reviews from mongodb
   const getReviews = async (courseCode) => {
     console.log("Fetching Reviews...");
     try {
@@ -265,6 +252,7 @@ export const ReviewSection = ({ courseCode }) => {
     }
   };
 
+  // Post review to mongodb
   const postReview = async (_date) => {
     console.log("Trying to post...");
     try {
@@ -293,6 +281,7 @@ export const ReviewSection = ({ courseCode }) => {
     }
   };
 
+  // Fetch reviews on some change
   useEffect(() => {
     const fetchReviews = async () => {
       if (!courseCode) return;
@@ -314,6 +303,7 @@ export const ReviewSection = ({ courseCode }) => {
     fetchReviews();
   }, [courseCode]);
 
+  // Format submission of review
   const handleSubmit = async () => {
     if (!text.trim() || rating === 0) return;
 
@@ -330,12 +320,12 @@ export const ReviewSection = ({ courseCode }) => {
       rating,
       text: text.trim(),
     };
-
     try {
       const response = await postReview(_date);
 
       if (response === -1) return;
 
+      // Clear states
       setReviews((prev) => [newReview, ...prev]);
       setText("");
       setRating(4);

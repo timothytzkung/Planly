@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "./PlannerView.module.css";
 
 // Custom course card for planner (modified from coursecatalogue)
+// See Card from coursecatalogue for documentation
 const CourseCard = ({
   course,
   isPlanned,
@@ -119,6 +120,7 @@ const CourseCard = ({
   );
 };
 
+// Manages plannerview
 export const PlannerView = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -126,6 +128,7 @@ export const PlannerView = () => {
 
   const { user, token, backport } = useContext(AuthContext);
 
+  // Fetch favourites
   const fetchCourses = async () => {
     try {
       setLoading(true);
@@ -157,6 +160,7 @@ export const PlannerView = () => {
     }
   };
 
+  // Fetch on some change
   useEffect(() => {
     if (!user || !token) return;
     fetchCourses();

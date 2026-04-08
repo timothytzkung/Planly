@@ -13,6 +13,7 @@ export const SignUpForm = () => {
     const [agreed, setAgreed] = useState(false);
     const [submitted, setSubmitted] = useState(false);
 
+    // Update field data
     const update = (field) => (e) => setFormData({ ...formData, [field]: e.target.value });
     const canSubmit = formData.name && formData.studentID && formData.email && formData.password && agreed;
 

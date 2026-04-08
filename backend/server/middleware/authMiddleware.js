@@ -13,7 +13,7 @@ exports.verifyToken = function (req, res, next) {
       token,
       process.env.JWT_SECRET || "fallbackSecret",
     );
-    req.user = decoded
+    req.user = decoded // add entire decoded to request
     req.userId = decoded.id; // add user ID to request
     next();
   } catch (error) {

@@ -8,6 +8,7 @@ export const SecondaryButton = ({ label, onClick, disabled } ) => {
     const SFU_DARK_RED = "#A3002B";
     const SFU_RED = "#CC0633";
     
+    // Button (Ghost)
     return(
         <button 
         onClick={onClick}

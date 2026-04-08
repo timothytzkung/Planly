@@ -7,6 +7,7 @@ export const PrimaryButton = ({ label, onClick, disabled } ) => {
     const SFU_DARK_RED = "#A3002B";
     const SFU_RED = "#CC0633";
     
+    // Red button
     return(
         <button 
         onClick={onClick}
