@@ -2,6 +2,8 @@
 // const require = createRequire(import.meta.url);
 const mongoose = require("mongoose");
 
+// Schema modelled after SFU outline API
+
 // =========================
 // MONGOOSE SCHEMA
 // =========================

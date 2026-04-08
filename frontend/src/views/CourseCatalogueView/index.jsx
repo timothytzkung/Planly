@@ -10,16 +10,19 @@ export const CourseCard = ({
   onTogglePlan,
   canAdd = false,
 }) => {
+  // If no course (i.e. landing page) return fragment
   if (!course) return <></>;
 
   const navigate = useNavigate();
   const { user, token, backport } = useContext(AuthContext);
   const [saving, setSaving] = useState(false);
 
+  // Navigates to detailed course view
   const handleClick = () => {
     navigate(`/courses/${course.courseCode}`, { state: { course } });
   };
 
+  // Add to favourites/planner
   const addToFavourites = async () => {
     const res = await fetch(
       `http://localhost:${backport}/api/sfuCourses/add-favourite`,
@@ -43,6 +46,7 @@ export const CourseCard = ({
     return await res.json();
   };
 
+  // Remove from favourites
   const removeFromFavourites = async () => {
     const res = await fetch(
       `http://localhost:${backport}/api/sfuCourses/remove-favourite`,
@@ -66,6 +70,7 @@ export const CourseCard = ({
     return await res.json();
   };
 
+  // Manages the toggle button on card
   const handlePlanClick = async () => {
     if (saving) return;
 
@@ -165,6 +170,7 @@ const FilterGroup = ({ title, options, checked, onChange }) => {
   );
 };
 
+// Vestigial filters panel (WIP)
 const FiltersPanel = ({ filters, onToggle }) => {
   const DEPT_FILTERS = ["SIAT", "CMPT", "MACM", "ARCH"];
   const REQ_FILTERS = ["SIAT Core", "SIAT Upper", "Computing", "Breadth"];
@@ -237,6 +243,7 @@ export const CourseCatalogue = ({ numResults = 7, canAdd }) => {
 
   const BACK_PORT = 5050;
 
+  // Chip mapping
   function getChipParams(chip) {
     switch (chip) {
       case "SIAT Core":
@@ -255,6 +262,7 @@ export const CourseCatalogue = ({ numResults = 7, canAdd }) => {
     }
   }
 
+  // Get favourites from backend
   const fetchFavourites = async () => {
     if (!user || !token) return [];
 
@@ -286,6 +294,7 @@ export const CourseCatalogue = ({ numResults = 7, canAdd }) => {
     }
   };
 
+  // Mini-debounce to avoid overlap
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
@@ -294,6 +303,7 @@ export const CourseCatalogue = ({ numResults = 7, canAdd }) => {
     return () => clearTimeout(timer);
   }, [search]);
 
+  // Magical AbortController to end prev requests
   useEffect(() => {
     const controller = new AbortController();
 
@@ -302,20 +312,24 @@ export const CourseCatalogue = ({ numResults = 7, canAdd }) => {
         setLoading(true);
         setError("");
 
+        // Look up params for GET
         const params = new URLSearchParams({
           page: page.toString(),
           limit: limit.toString(),
         });
 
+        // Cleans search innput
         if (debouncedSearch.trim()) {
           params.set("search", debouncedSearch.trim());
         }
 
+        // Add chip filter params
         const chipParams = getChipParams(activeChip);
         Object.entries(chipParams).forEach(([key, value]) => {
           params.set(key, value);
         });
 
+        // Fetch with abort signal
         const res = await fetch(
           `http://localhost:${BACK_PORT}/api/sfuCourses/available-courses?${params.toString()}`,
           {
@@ -326,6 +340,7 @@ export const CourseCatalogue = ({ numResults = 7, canAdd }) => {
 
         if (!res.ok) throw new Error("Failed to fetch courses");
 
+        // Set the data and pages
         const data = await res.json();
         setCourses(data.items || []);
         setTotal(data.total || 0);
@@ -346,6 +361,7 @@ export const CourseCatalogue = ({ numResults = 7, canAdd }) => {
     return () => controller.abort();
   }, [page, debouncedSearch, activeChip]);
 
+  // Load planned courses on some change
   useEffect(() => {
     if (!user || !token) {
       setFavourites([]);
@@ -365,6 +381,7 @@ export const CourseCatalogue = ({ numResults = 7, canAdd }) => {
     setActiveChip(chip);
   };
 
+  // Handles toggle
   const handleTogglePlan = (courseId, shouldBePlanned) => {
     const id = courseId.toString();
 
@@ -377,6 +394,7 @@ export const CourseCatalogue = ({ numResults = 7, canAdd }) => {
     });
   };
 
+  // return unique set of favourites (sanity check, shouldn't be duplicates...)
   const favouriteSet = useMemo(() => new Set(favourites), [favourites]);
 
   return (
@@ -437,6 +455,7 @@ export const CourseCatalogue = ({ numResults = 7, canAdd }) => {
   );
 };
 
+// Returns course catalogue view
 export const CourseCatalogueView = ({ canAdd = true }) => {
   return (
     <div className={styles.container}>

@@ -8,6 +8,7 @@ import { useState, useEffect, useContext, Fragment } from "react";
 
 import { AuthContext } from '../../context/AuthContext';
 
+// Star icon
 const StarRating = ({ rating }) => (
   <span style={{ color: "#1a1a1a", letterSpacing: 1 }}>
     {Array.from({ length: 5 }, (_, i) => (
@@ -16,6 +17,7 @@ const StarRating = ({ rating }) => (
   </span>
 );
 
+// Admin View
 export const AdminReview = () => {
   const [reviews, setReviews] = useState([]);
   const [search, setSearch] = useState("");
@@ -25,6 +27,7 @@ export const AdminReview = () => {
 
   const { token, backport } = useContext(AuthContext);
 
+  // Updates review (generally for deletion)
   const updateReview = (id, patch) =>
     setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
 
@@ -47,13 +50,15 @@ export const AdminReview = () => {
       }
     };
 
+  // Sum count of review attributes
   const flaggedCount = reviews.filter((r) => r.flagged).length;
   const hiddenCount = reviews.filter((r) => r.status === "hidden").length;
   const avgRating = reviews.length
     ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
     : "0.0";
 
-  const fetchCourses = async () => {
+  // Fetch reviews
+  const fetchReviews = async () => {
     try {
       const res = await fetch(`http://localhost:${backport}/api/sfuCourses/reviews/all`);
       if (res.ok) {
@@ -87,11 +92,11 @@ export const AdminReview = () => {
   });
 
   useEffect(() => {
-    const handleFetchCourses = async () => {
-      const res = await fetchCourses();
+    const handleFetchReviews = async () => {
+      const res = await fetchReviews();
       setReviews(res);
     }
-    handleFetchCourses();
+    handleFetchReviews();
   }, [])
 
   const styles = {

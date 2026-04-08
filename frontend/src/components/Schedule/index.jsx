@@ -16,8 +16,8 @@ function CalendarIcon() {
     );
 }
 
-
-export const Schedule = ({ }) => {
+// Component for managing schedule rendering
+export const Schedule = () => {
     const { currentCourses, backport } = useContext(AuthContext);
 
     const [activeDay, setActiveDay] = useState(null);
@@ -44,6 +44,7 @@ export const Schedule = ({ }) => {
         }
     }
 
+    // Get schedule
     useEffect(() => {
         const handleFetchSchedule = async() => {
             // console.log(currentCourses)

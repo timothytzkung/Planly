@@ -122,6 +122,7 @@ export const PdfUploadPage = () => {
     setLoading(false)
   }
 
+  // verify reqs from backend
   const checkRequirements = async (_degreeType) => {
     console.log("calling backend for checkreqs")
     console.log(transcript);

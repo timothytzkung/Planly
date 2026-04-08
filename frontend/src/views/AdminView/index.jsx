@@ -2,8 +2,9 @@
 import {Sidebar} from "../../components/Sidebar"
 import { AdminReview } from "../../components/AdminReview"
 
-export const AdminView = () => {
 
+// Very simple admin view lol
+export const AdminView = () => {
 
     return(
         <div style={{

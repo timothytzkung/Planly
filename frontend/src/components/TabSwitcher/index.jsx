@@ -28,7 +28,6 @@ const TabButton = ( { tab, isActive, onTabChange } ) => {
 
 // Core component
 export const TabSwitcher = ({ activeTab, onTabChange }) => {
-
     return(
         <div className={styles.container}>
             {/*  Tabs Array  */}

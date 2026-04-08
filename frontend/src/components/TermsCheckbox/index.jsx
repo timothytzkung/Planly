@@ -1,7 +1,5 @@
 export const TermsCheckbox = ({ checked, onChange }) => {
-
-    //Idk if I'mma separate this later
-    // Manages checkbox rendering; will move styles into modules later
+    // Manages checkbox rendering
     return (
         <div
             onClick={onChange}

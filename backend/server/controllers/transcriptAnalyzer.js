@@ -1,9 +1,5 @@
 // Analyzes transcripts; hard coded for IAT BSc
-/*
-TODO;
 
-Change breadth requirements to fetch from SFU API
-*/
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 

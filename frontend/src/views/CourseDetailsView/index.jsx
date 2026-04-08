@@ -89,6 +89,7 @@ const InfoRow = ({ label, value }) => (
   </div>
 );
 
+// Reusable card component
 const Card = ({ children, style = {} }) => (
   <div
     style={{
@@ -103,6 +104,7 @@ const Card = ({ children, style = {} }) => (
   </div>
 );
 
+// Vestigial schedule (removed schedule component from render)
 function formatSchedule(schedule) {
   if (!schedule || schedule.length === 0) return "TBA";
   return schedule
@@ -111,6 +113,7 @@ function formatSchedule(schedule) {
     .join(", ");
 }
 
+// Format dates for render
 function formatDates(schedule) {
   if (!schedule || schedule.length === 0) return "";
   const s = schedule[0];
@@ -119,8 +122,7 @@ function formatDates(schedule) {
   return `${fmt(s.startDate)} – ${fmt(s.endDate)}`;
 }
 
-
-
+// Expanded course detail view
 export const CourseDetails = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [instructorInfo, setInstructorInfo] = useState(null);
@@ -129,8 +131,10 @@ export const CourseDetails = () => {
   const location = useLocation();
   const course = location.state?.course;
 
+  // Return none if no courses
   if (!course) return <div>No course data</div>;
 
+  // Information from API
   const { info, courseSchedule, instructor, courseTitle, section, termLabel } = course;
   const title = info?.title || courseTitle || "Untitled Course";
   const courseCode = `${course.departmentCode} ${course.courseNumber}`;
@@ -153,11 +157,13 @@ export const CourseDetails = () => {
     { star: 2, count: 0 },
     { star: 1, count: 0 },
   ];
+  // Get instructor name
   const instructorName =
     instructor && instructor.length > 0
       ? instructor.map((i) => i.name || i.displayName).join(", ")
       : "TBA";
-
+  
+  // Fetch from external API
   const getInstructorInfo = async (name) => {
     try {
       const response = await fetch(`https://api.sfucourses.com/v1/rest/reviews/instructors/${name}`)
@@ -172,6 +178,7 @@ export const CourseDetails = () => {
     }
   }
 
+  // Fetch information on course change
   useEffect(() => {
     const handleGetInstructorInfo = async () => {
       const res = await getInstructorInfo(instructorName)

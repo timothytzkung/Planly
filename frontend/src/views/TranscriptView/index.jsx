@@ -3,10 +3,10 @@ import styles from "./TranscriptView.module.css";
 import { useEffect, useState, useContext } from 'react';
 
 import { Sidebar } from "../../components/Sidebar";
-import { Schedule } from "../../components/Schedule";
 import { TranscriptCard } from "../../components/TranscriptCard/TranscriptCard";
 import { AuthContext } from "../../context/AuthContext";
 
+// Transcript view component
 export const TranscriptView = () => {
     const [summary, setSummary] = useState(null);
     const [loading, setLoading] = useState(true);

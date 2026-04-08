@@ -85,9 +85,11 @@ router.get("/available-courses", async (req, res) => {
       deliveryMethod,
     } = req.query;
 
+    // Contain query and conditions
     const query = {};
     const andConditions = [];
 
+    // Clean search => search
     if (search.trim()) {
       andConditions.push({
         $or: [
@@ -99,6 +101,7 @@ router.get("/available-courses", async (req, res) => {
       });
     }
 
+    // Add conditions for query (mongodb)
     if (departmentCode) {
       andConditions.push({
         departmentCode: { $regex: `^${departmentCode}$`, $options: "i" },
@@ -136,15 +139,18 @@ router.get("/available-courses", async (req, res) => {
       query.$and = andConditions;
     }
 
+    // Limit wte page number from req
     const pageNum = Number(page);
     const limitNum = Number(limit);
     const skip = (pageNum - 1) * limitNum;
 
+    // Resolve promises
     const [items, total] = await Promise.all([
       CourseSection.find(query).skip(skip).limit(limitNum).lean(),
       CourseSection.countDocuments(query),
     ]);
 
+    // Return json
     res.json({
       items,
       total,
@@ -164,12 +170,14 @@ router.post("/make-schedule", async (req, res) => {
   try {
     const { courses } = req.body;
 
+    // Ensure courses is an array type & size > 0
     if (!Array.isArray(courses) || courses.length === 0) {
       return res.status(204).json({
         message: "Request body must include a non-empty 'courses' array",
       });
     }
 
+    // Unique courses (no overlap)
     const normalizedCourses = [...new Set(
       courses.map((course) => course.trim().toUpperCase().replace(/\s+/g, " "))
     )];
@@ -183,18 +191,21 @@ router.post("/make-schedule", async (req, res) => {
       })
     );
 
+    // Map courses
     const validCourses = rawCourses.filter(Boolean);
     const foundCourses = validCourses.map((course) => course.courseCode);
     const missingCourses = normalizedCourses.filter(
       (code) => !foundCourses.includes(code)
     );
 
+    // No courses found
     if (validCourses.length === 0) {
       return res.status(404).json({
         error: "No matching courses found",
         missingCourses,
       });
     }
+    // Generate schedule from controller
     const schedule = GenerateSchedule(validCourses);
 
     return res.status(200).json({
@@ -213,12 +224,14 @@ router.post("/make-schedule", async (req, res) => {
 router.post("/review", async (req, res) => {
   const { userId, text, rating, courseCode, date } = req.body;
 
+  // If missing req info, return
   if (!userId || !text || rating == null || !courseCode) {
     return res.status(400).json({
       message: "Missing required fields",
     });
   }
 
+  // Attempt new review generation
   try {
     const newReview = new Review({
       owner: userId,
@@ -287,7 +300,7 @@ router.get("/reviews/all", async (req, res) => {
 // Delete review
 router.delete("/reviews/:id", verifyToken, verifyAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params; // review id
 
     const deleted = await Review.findByIdAndDelete(id);
 

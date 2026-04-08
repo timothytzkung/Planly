@@ -8,6 +8,7 @@ const GRADE_POINTS = {
     'D': 1.0, 'F': 0.0
 };
 
+// Cleaner for timeline
 const parseTimelineEntries = (timeline) => {
     if (!timeline) return [];
     if (timeline instanceof Map) {
@@ -16,6 +17,7 @@ const parseTimelineEntries = (timeline) => {
     return Object.entries(timeline);
 };
 
+// Calculates GPA
 const computeSemesterGPA = (grades) => {
     if (!grades || grades.length === 0) return 0;
     const points = grades
@@ -25,6 +27,7 @@ const computeSemesterGPA = (grades) => {
     return points.reduce((sum, value) => sum + value, 0) / points.length;
 };
 
+// Sort semester terms
 const sortSemesterTerms = (terms) => {
     const seasonOrder = { Winter: 0, Spring: 1, Summer: 2, Fall: 3 };
     return terms.sort((a, b) => {
@@ -35,6 +38,8 @@ const sortSemesterTerms = (terms) => {
     });
 };
 
+
+// Transcript card component for transcript view
 export const TranscriptCard = ({ summary }) => {
     const [activeSemester, setActiveSemester] = useState('All');
 
@@ -50,6 +55,7 @@ export const TranscriptCard = ({ summary }) => {
             };
         }
 
+        // Summary
         const gpaData = summary.gpa;
         const summaryData = summary.summary;
         const timelineEntries = parseTimelineEntries(summary.timeline);
