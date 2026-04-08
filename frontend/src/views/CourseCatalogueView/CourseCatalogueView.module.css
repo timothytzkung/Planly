@@ -1,7 +1,7 @@
 .container {
     font-family: 'DM Sans', sans-serif;
-    background: #f5f5f7;
-    min-height: 100vh;
+    background: #FFF;
+    min-height: 100vh; 
     display: flex;
 }
 
@@ -9,8 +9,8 @@
 /* ── Main ── */
 .main {
     margin-top: 3em;
-    margin-left: 220px;
-    margin-right: 110px;
+    /* margin-left: 420px;
+    margin-right: 110px; */
     flex: 1;
     padding: 32px 40px;
     max-width: calc(100% - 220px);
@@ -168,6 +168,7 @@
     align-items: baseline;
     gap: 8px;
     margin-bottom: 8px;
+    cursor: pointer;
 }
 
 .cardCode {

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import logo from "../../assets/logo.svg"
 
 // Import styles
-import styles from "./Sidebar.module.css";
+import styles from "./AdminSidebar.module.css";
 
 // Components
 import { SecondaryButton } from "../SecondaryButton";
@@ -58,12 +58,10 @@ const TranscriptIcon = () => (
 const navItems = [
   { id: "dashboard", label: "Home", icon: <HomeIcon /> },
   { id: "course-catalogue", label: "Course Catalogue", icon: <CatalogueIcon /> },
-  { id: "degree", label: "Degree", icon: <DegreeIcon /> },
-  { id: "planner", label: "Planner", icon: <PlannerIcon /> },
-  { id: "transcript", label: "Transcript", icon: <TranscriptIcon /> },
+  { id: "course-review", label: "Transcript", icon: <TranscriptIcon /> },
 ];
 
-export const Sidebar = () => {
+export const AdminSidebar = () => {
   const { token, user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();

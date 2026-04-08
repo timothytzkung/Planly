@@ -3,28 +3,30 @@
 // =========================
 const axios = require("axios");
 require("dotenv").config();
+const mongoose = require('mongoose');
 
 // runner
 // node dbInit.js
 
 // Course model
-const CourseSection = require ("../models/CourseSection");
+const CourseSection = require ("./models/CourseSection.js");
 
 const MONGO_URI = process.env.MONGO_WQB_URI;
 const BASE_URL = "https://www.sfu.ca/bin/wcm/course-outlines";
 const YEAR = "2026";
-const TERM = "summer";
+const TERM = "spring";
 
 // All Departments ( I think... )
-const TEST_DEPARTMENTS = [
- "arch", "bisc", "bpk", "bus", "ca", "cenv", "chem", "chin", 
-  "cmns", "cogs", "crim", "dmed", "easc", "econ", "educ", "engl", "ensc", 
-  "evsc", "fal", "fan", "fass", "fep", "fren", "ga", "geog", "gero", "grad", 
-  "gsws", "hist", "hsci", "hum", "indg", "inlg", "ins", "is", "japn", 
-  "lbrl", "lbst", "ling", "ls", "macm", "masc", "math", "mbb", "mse", "nusc", 
-  "phil", "phys", "plan", "plcy", "pol", "psyc", "pub", "rem", "risk", "sa", 
-  "sci", "sd", "see", "span", "stat", "tekx", "urb", "wl"
-]; // e.g. ["cmpt", "iat"]
+// const TEST_DEPARTMENTS = [
+//  "arch", "bisc", "bpk", "bus", "ca", "cenv", "chem", "chin", 
+//   "cmns", "cogs", "crim", "dmed", "easc", "econ", "educ", "engl", "ensc", 
+//   "evsc", "fal", "fan", "fass", "fep", "fren", "ga", "geog", "gero", "grad", 
+//   "gsws", "hist", "hsci", "hum", "indg", "inlg", "ins", "is", "japn", 
+//   "lbrl", "lbst", "ling", "ls", "macm", "masc", "math", "mbb", "mse", "nusc", 
+//   "phil", "phys", "plan", "plcy", "pol", "psyc", "pub", "rem", "risk", "sa", 
+//   "sci", "sd", "see", "span", "stat", "tekx", "urb", "wl"
+// ]; // e.g. ["cmpt", "iat"]
+const TEST_DEPARTMENTS = ["cmpt", "iat"]
 
 
 // =========================

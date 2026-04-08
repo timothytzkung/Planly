@@ -1,8 +1,8 @@
-* {
+/* * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-}
+} */
 
 form {
     margin: 6px;
@@ -11,8 +11,8 @@ form {
 .container {
     max-height: 100vh;
     padding: 32px 24px;
-    min-width: 900px;
-    max-width: 100%;
+    width: 1200px;
+    max-width: 80%;
     margin: 0 auto;
     margin-top: 2em;
 }

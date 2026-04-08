@@ -2,6 +2,7 @@
 
 import { Dashboard } from "../../components/Dashboard";
 import { Sidebar } from "../../components/Sidebar";
+import { Schedule } from "../../components/Schedule";
 
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
@@ -192,14 +193,6 @@ export const DashboardView = () => {
 
     // Trigger on finished pdf upload
     useEffect(() => {
-        if (!transcript) {
-            // const handleFetchTranscript = async() => {
-            //     const result = await fetchTranscript();
-            //     console.log(result);
-            //     setTranscript(result);
-            // }
-            // handleFetchTranscript();
-        }
         if (!reqSummary && user) {
             const handleFetchSummary = async() => {
                 const result = await fetchSummary();
@@ -235,6 +228,7 @@ export const DashboardView = () => {
                 summary={reqSummary}
                 _error={err}
             />
+            <Schedule />
             
             {/* {err && (
         <div style={{ marginTop: 16, color: "crimson" }}>

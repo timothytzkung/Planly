@@ -1,0 +1,163 @@
+
+  .calWrapper {
+    background: #fff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding-right: 32px;
+    padding-top: 32px;
+    margin-top: 1rem;
+
+  }
+ 
+  .calCard {
+    background: #fff;
+    border-radius: 28px;
+    width: 360px;
+    padding: 32px 28px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.05);
+  }
+ 
+  .calHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 36px;
+  }
+ 
+  .calTitle {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: #1a1a2e;
+    letter-spacing: -0.5px;
+  }
+ 
+  .calIconBtn {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: #e0243a;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 10px rgba(224,36,58,0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+ 
+  .calIconBtn:hover {
+    transform: scale(1.07);
+    box-shadow: 0 5px 16px rgba(224,36,58,0.4);
+  }
+ 
+  .calIconBtn svg {
+    color: white;
+    width: 22px;
+    height: 22px;
+  }
+ 
+  .daySection {
+    margin-bottom: 32px;
+  }
+ 
+  .daySection:last-child {
+    margin-bottom: 0;
+  }
+ 
+  .dayHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+ 
+  .dayLabel {
+    font-size: 15px;
+    font-weight: 500;
+    color: #a0a0b0;
+    letter-spacing: 0.1px;
+  }
+ 
+  .dayDots {
+    display: flex;
+    gap: 4px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: background 0.15s;
+  }
+ 
+  .dayDots:hover {
+    background: rgba(0,0,0,0.05);
+  }
+ 
+  .dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #c0c0cc;
+  }
+ 
+  .classItem {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 18px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    transition: background 0.15s ease;
+    cursor: pointer;
+  }
+ 
+  .classItem:last-child {
+    margin-bottom: 0;
+  }
+ 
+  .classItem:hover {
+    background: rgba(0,0,0,0.04);
+  }
+ 
+  .timeLabel {
+    font-family: 'DM Mono', monospace;
+    font-size: 17px;
+    font-weight: 500;
+    color: #1a1a2e;
+    min-width: 54px;
+    letter-spacing: -0.5px;
+  }
+ 
+  .color-bar {
+    width: 3px;
+    height: 44px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+ 
+  .classInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+ 
+  .classCategory {
+    font-size: 11px;
+    font-weight: 600;
+    color: #b0b0c0;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
+ 
+  .classCourse {
+    font-size: 16px;
+    font-weight: 600;
+    color: #6a6a80;
+    letter-spacing: -0.2px;
+  }
+ 
+  .divider {
+    height: 1px;
+    background: rgba(0,0,0,0.06);
+    margin: 24px 0;
+  }

@@ -20,12 +20,15 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    favourites: [
+        {   type: mongoose.Schema.Types.ObjectId,
+            ref: "CourseSection",
+        }
+    ],
     role: {
-        type: String
-    },
-    transcriptData: { // Might add transcript schema for summary? idk
-        uploadDate: Date,
-        data: String //  Currently gonna just stringify the JSON
+        type: String, 
+        enum: ['member', 'admin'], // Guarantees that only these specific values can be saved
+        default: 'member' // Every new registration gets lowest priv.
     }
 });
 

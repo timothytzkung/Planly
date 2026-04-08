@@ -2,12 +2,13 @@
 import styles from "./Dashboard.module.css"
 import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
+import { UserContext } from "../../context/UserContext";
 
 // Dashboard view, props will contain data?
 export const Dashboard = ({ uploadTranscript, setFile, file, setTranscript, transcript, summary, _error}) => {
     // current courses stash
     const [currentTerm, setCurrentTerm] = useState("");
-    const [currentCourses, setCurrentCourses] = useState(null);
+    // const [currentCourses, setCurrentCourses] = useState(null);
     const [lowerDivision, setLowerDivision] = useState(0);
     const [upperDivision, setUpperDivision] = useState(0);
     const [totalBreadth, setTotalBreadth] = useState(0);
@@ -23,7 +24,7 @@ export const Dashboard = ({ uploadTranscript, setFile, file, setTranscript, tran
     const { timeline } = summary?.timeline || 0;
 
       // Destructure to use contexts
-    const { token, user, logout } = useContext(AuthContext);
+    const { currentCourses, setCurrentCourses } = useContext(AuthContext);
 
 
     // const gaps = [

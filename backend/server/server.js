@@ -23,7 +23,7 @@ const Summary = require("./models/Summary");
 // In-house functions
 import { parseTranscriptByTerm } from "./utils/parse.js";
 import { transcriptAnalyzer } from "./controllers/transcriptAnalyzer.js";
-const verifyToken = require("./middleware/authMiddleware");
+const {verifyToken} = require("./middleware/authMiddleware");
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -140,6 +140,7 @@ app.post("/api/summary/", async(req, res) => {
     });
   }
 })
+
 
 // API
 app.use("/api/sfuCourses", sfuCourseRoutes);

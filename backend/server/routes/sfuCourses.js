@@ -2,7 +2,11 @@
 const express = require("express");
 const router = express.Router();
 const WQBCourse = require("../models/wqbCourse");
-const CourseSection = require("../models/CourseSection")
+const CourseSection = require("../models/CourseSection");
+const Review = require("../models/Review");
+const User = require("../models/User");
+const { GenerateSchedule } = require("../controllers/scheduleGenerator");
+const {verifyToken} = require("../middleware/authMiddleware");
 
 // SFU API courses in dept. route (req includes => {year, term, department })
 router.post("/courses", async (req, res) => {
@@ -70,39 +74,310 @@ router.get("/breadth-courses", async (req, res) => {
 // Fetches available courses in summer 2026 (just for now, idk if will add later)
 router.get("/available-courses", async (req, res) => {
   try {
-    // Limit by pages & set default vals
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50;
-    const search = req.query.search || "";
+    const {
+      page = 1,
+      limit = 7,
+      search = "",
+      departmentCode,
+      level,
+      designation,
+      noPrereqs,
+      deliveryMethod,
+    } = req.query;
 
-    // page skip
-    const skip = (page - 1) * limit;
+    const query = {};
+    const andConditions = [];
 
-    // mongodb query 
-    const query = search
-      ? {
+    if (search.trim()) {
+      andConditions.push({
         $or: [
+          { courseCode: { $regex: search, $options: "i" } },
           { courseTitle: { $regex: search, $options: "i" } },
-          { courseCode: { $regex: search, $options: "i" } }
-        ]
-      }
-      : {};
+          { "info.description": { $regex: search, $options: "i" } },
+          { departmentCode: { $regex: search, $options: "i" } },
+        ],
+      });
+    }
 
-    // only return when promises all fulfilled
+    if (departmentCode) {
+      andConditions.push({
+        departmentCode: { $regex: `^${departmentCode}$`, $options: "i" },
+      });
+    }
+
+    if (level === "upper") {
+      andConditions.push({
+        courseNumber: { $regex: "^[3-4][0-9]{2}[A-Z]?$", $options: "i" },
+      });
+    }
+
+    if (designation) {
+      andConditions.push({
+        "info.designation": { $regex: designation, $options: "i" },
+      });
+    }
+
+    if (noPrereqs === "true") {
+      andConditions.push({
+        $or: [
+          { "info.prerequisites": "" },
+          { "info.prerequisites": null },
+        ],
+      });
+    }
+
+    if (deliveryMethod) {
+      andConditions.push({
+        "info.deliveryMethod": { $regex: deliveryMethod, $options: "i" },
+      });
+    }
+
+    if (andConditions.length > 0) {
+      query.$and = andConditions;
+    }
+
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
+    const skip = (pageNum - 1) * limitNum;
+
     const [items, total] = await Promise.all([
-      CourseSection.find(query).skip(skip).limit(limit).lean(),
-      CourseSection.countDocuments(query)
+      CourseSection.find(query).skip(skip).limit(limitNum).lean(),
+      CourseSection.countDocuments(query),
     ]);
 
     res.json({
       items,
       total,
-      page,
-      totalPages: Math.ceil(total / limit)
+      page: pageNum,
+      totalPages: Math.ceil(total / limitNum),
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({
+      message: "Failed to fetch courses",
+    });
+  }
+});
+
+// Makes a schedule based off incoming course codes
+router.post("/make-schedule", async (req, res) => {
+  try {
+    const { courses } = req.body;
+
+    if (!Array.isArray(courses) || courses.length === 0) {
+      return res.status(204).json({
+        message: "Request body must include a non-empty 'courses' array",
+      });
+    }
+
+    const normalizedCourses = [...new Set(
+      courses.map((course) => course.trim().toUpperCase().replace(/\s+/g, " "))
+    )];
+
+    // Fetch first section for each requested course
+    const rawCourses = await Promise.all(
+      normalizedCourses.map(async (courseCode) => {
+        return await CourseSection.findOne({ courseCode })
+          .sort({ section: 1 }) // picks the "first" section consistently
+          .lean();
+      })
+    );
+
+    const validCourses = rawCourses.filter(Boolean);
+    const foundCourses = validCourses.map((course) => course.courseCode);
+    const missingCourses = normalizedCourses.filter(
+      (code) => !foundCourses.includes(code)
+    );
+
+    if (validCourses.length === 0) {
+      return res.status(404).json({
+        error: "No matching courses found",
+        missingCourses,
+      });
+    }
+    const schedule = GenerateSchedule(validCourses);
+
+    return res.status(200).json({
+      schedule,
+      foundCourses,
+      missingCourses,
+    });
+  } catch (e) {
+    return res.status(500).json({
+      error: e.message || "Internal server error",
+    });
+  }
+});
+
+// Post a review
+router.post("/review", async (req, res) => {
+  const { userId, text, rating, courseCode, date } = req.body;
+
+  if (!userId || !text || rating == null || !courseCode) {
+    return res.status(400).json({
+      message: "Missing required fields",
+    });
+  }
+
+  try {
+    const newReview = new Review({
+      owner: userId,
+      courseCode,
+      rating,
+      text,
+      date,
+    });
+
+    await newReview.save();
+
+    return res.status(200).json({
+      message: "Review saved!",
+      review: newReview,
+    });
+  } catch (err) {
+    console.error("Save error:", err);
+    return res.status(400).json({
+      message: "Error saving post",
+      error: err.message,
+    });
+  }
+});
+
+
+// Get all reviews for some course
+router.get("/reviews", async (req, res) => {
+  try {
+    const { courseCode } = req.query;
+    const _reviews = await Review.find({ courseCode: courseCode });
+
+    res.status(200).json({ reviews: _reviews });
+  } catch (e) {
+    console.log("Error fetching reviews: ", e);
+    res.status(500).json({ error: e });
+  }
+});
+
+// Get all reviews irrespective of courses (for admin view)
+router.get("/reviews/all", async (req, res) => {
+  try {
+    const reviews = await Review.find()
+      .populate("owner", "name studentID")
+      .lean();
+
+    const formattedReviews = reviews.map((review, index) => ({
+      id: review._id.toString(), // better than fake numeric ids
+      course: review.courseCode,
+      student: review.owner?.name || "Unknown User",
+      studentId: review.owner?.studentID || "",
+      rating: review.rating,
+      date: review.date || "",
+      status: "visible", // frontend-only default
+      flagged: review.flagged ?? false,
+      review: review.text,
+      expanded: false, // frontend UI state default
+    }));
+
+    res.json(formattedReviews);
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    res.status(500).json({ message: "Failed to fetch reviews" });
+  }
+});
+
+// Delete review
+router.delete("/reviews/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deleted = await Review.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    res.json({ message: "Review deleted successfully" });
+  } catch (err) {
+    console.error("Delete error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+// Fetch favourites
+router.post("/get-favourites", async(req, res) => {
+  if (!req.body) return res.status(400).json({ error: "No body attached" });
+  try {
+
+    const user = await User.findById(req.body.userId).populate("favourites");
+
+    if (!user) {
+      return res.status(404).json({ message: "No user found" });
+    }
+    res.status(200).json(user.favourites);
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({
+      message: "Internal server error",
+      error: e.message,
+    });
   }
 })
+
+// Add to favourites
+router.post("/add-favourite", verifyToken, async (req, res) => {
+  const { userId, courseId } = req.body;
+
+  if (!userId || !courseId) {
+    return res.status(400).json({ error: "Missing userId or courseId" });
+  }
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "No user found" });
+    }
+
+    // Prevent duplicates
+    if (!user.favourites.includes(courseId)) {
+      user.favourites.push(courseId);
+      await user.save();
+    }
+
+    res.status(200).json(user.favourites);
+
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({
+      message: "Internal server error",
+      error: e.message,
+    });
+  }
+});
+
+router.post("/remove-favourite", async (req, res) => {
+  const { userId, courseId } = req.body;
+
+  if (!userId || !courseId) {
+    return res.status(400).json({ error: "Missing userId or courseId" });
+  }
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { favourites: courseId } }, // remove from array
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "No user found" });
+    }
+
+    res.status(200).json(updatedUser.favourites);
+
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
 module.exports = router;

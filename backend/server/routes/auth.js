@@ -18,7 +18,7 @@ router.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // 3. save the user
-    const newUser = new User({ name, studentID, email, password: hashedPassword, transcriptData: "" , role: "member"});
+    const newUser = new User({ name, studentID, email, password: hashedPassword, role: "member"});
     await newUser.save();
 
     res.status(201).json({ message: "User registered successfully" });
@@ -48,14 +48,15 @@ router.post("/login", async (req, res) => {
       {
         id: user._id,
         email: user.email,
-        name: user.name
+        name: user.name,
+        role: user.role
 
       },
       process.env.JWT_SECRET || "fallbackSecret",
       { expiresIn: "1h" },
     );
 
-    res.json({ token, user: { id: user._id, email: user.email, name: user.name } });
+    res.json({ token, user: { id: user._id, email: user.email, name: user.name, role: user.role } });
   } catch (err) {
     console.log(err)
     res.status(500).json({ error: err.message });
