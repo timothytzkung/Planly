@@ -178,7 +178,7 @@ export const PlannerView = () => {
       <div style={{ display: "flex", flexDirection: "column", flex: 1, padding: "40px 0" }}>
 
         {/* Header */}
-        <h1 style={{ fontSize: 22, fontWeight: 600, margin: "0 2.25rem 4px" }}>Planner</h1>
+        <h1 style={{ fontSize: "2rem", fontWeight: 700, margin: "0 2.25rem 4px" }}>Planner</h1>
         <p style={{ fontSize: 13.5, color: "#888", margin: "0 2.25rem 28px" }}>
           Your saved courses — manage and organise what you plan to take
         </p>

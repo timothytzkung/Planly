@@ -88,7 +88,6 @@ export const TranscriptView = () => {
                     </div>
                 )}
             </div>
-            <Schedule />
         </div>
     )
 }

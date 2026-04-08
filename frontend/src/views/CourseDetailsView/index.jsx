@@ -7,8 +7,9 @@ import { ReviewSection } from "../../components/ReviewSection"
 // Can't be bothered to modularize css anymore oml
 
 // Claude generated star lol
-const starIcon = (filled) => (
+const starIcon = (filled, _id) => (
   <svg
+    key={_id}
     width="14"
     height="14"
     viewBox="0 0 14 14"
@@ -22,7 +23,7 @@ const starIcon = (filled) => (
 
 const StarRow = ({ rating, max = 5 }) => (
   <span style={{ display: "inline-flex", gap: 2 }}>
-    {Array.from({ length: max }, (_, i) => starIcon(i < Math.round(rating)))}
+    {Array.from({ length: max }, (_, i) => starIcon(i < Math.round(rating), i))}
   </span>
 );
 
@@ -184,7 +185,7 @@ export const CourseDetails = () => {
     <div
       style={{
         marginTop: "2rem",
-        background: "#FAFAFA",
+        background: "#FFFFFF",
         minHeight: "100vh",
         padding: "0 0 60px",
         width: "80%"

@@ -6,6 +6,7 @@ const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
 
   .review-root {
+    background: #ffffff;
     font-family: 'DM Sans', sans-serif;
     min-height: 100vh;
     padding: 20px 20px;
@@ -377,7 +378,7 @@ export const ReviewSection = ({ courseCode }) => {
           <div key={review.id} className="review-card review-item">
             <div className="review-item-header">
               <div>
-                <span className="reviewer-name">{review.name}</span>
+                <span className="reviewer-name">Anonymous</span>
                 <span className="reviewer-date">{review.date}</span>
               </div>
               <ReviewStars rating={review.rating} />

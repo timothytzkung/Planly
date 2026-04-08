@@ -68,12 +68,24 @@ export const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+
+  const getInitials = (name) => {
+    if (!name) return "";
+    return name
+      .trim()
+      .split(/\s+/)             // handles multiple spaces
+      .slice(0, 2)              // optional: limit to first + last
+      .map(word => word[0])
+      .join("")
+      .toUpperCase();
+  };
+
   return (
     <div className={styles.sidebar}>
       <div className={styles.accentBar} />
 
       <div className={styles.profile}>
-        <div className={styles.avatar}>TD</div>
+        <div className={styles.avatar}>{getInitials(user.name)}</div>
         <div className={styles.profileInfo}>
           <h2 className={styles.profileInfoH2}>{user?.name || "Guest"}</h2>
           <span className={styles.profileInfoSpan}>SIAT Major | BSc</span>
