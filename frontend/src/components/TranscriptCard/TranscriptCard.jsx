@@ -194,34 +194,36 @@ export const TranscriptCard = ({ summary }) => {
                             </div>
                         )}
 
-                        <table className={styles.coursesTable}>
-                            <thead>
-                                <tr>
-                                    <th>Course Code</th>
-                                    <th>Title</th>
-                                    <th>Credits</th>
-                                    <th>Grade</th>
-                                    <th>Status</th>
-                                    <th>Term</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredCourses.map((course, idx) => (
-                                    <tr key={`${course.term}-${course.code || course.faculty}-${idx}`}>
-                                        <td className={styles.courseCode}>{course.code || `${course.faculty} ${course.courseNumber}`}</td>
-                                        <td className={styles.courseTitle}>{course.name || course.courseName}</td>
-                                        <td>{course.credits}</td>
-                                        <td>
-                                            <span className={`${styles.gradeChip} ${styles[getGradeColor(course.grade)]}`}>
-                                                {course.grade || 'N/A'}
-                                            </span>
-                                        </td>
-                                        <td>{course.status}</td>
-                                        <td>{course.term}</td>
+                        <div className={styles.tableWrapper}>
+                            <table className={styles.coursesTable}>
+                                <thead>
+                                    <tr>
+                                        <th>Course Code</th>
+                                        <th>Title</th>
+                                        <th>Credits</th>
+                                        <th>Grade</th>
+                                        <th>Status</th>
+                                        <th>Term</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {filteredCourses.map((course, idx) => (
+                                        <tr key={`${course.term}-${course.code || course.faculty}-${idx}`}>
+                                            <td className={styles.courseCode}>{course.code || `${course.faculty} ${course.courseNumber}`}</td>
+                                            <td className={styles.courseTitle}>{course.name || course.courseName}</td>
+                                            <td>{course.credits}</td>
+                                            <td>
+                                                <span className={`${styles.gradeChip} ${styles[getGradeColor(course.grade)]}`}>
+                                                    {course.grade || 'N/A'}
+                                                </span>
+                                            </td>
+                                            <td>{course.status}</td>
+                                            <td>{course.term}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </>
                 ) : (
                     <div className={styles.emptyState}>
