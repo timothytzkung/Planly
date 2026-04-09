@@ -174,6 +174,7 @@ export const DegreePlanner = ({ summary }) => {
         });
     };
 
+    // Format courses via timeline from summary
     useEffect(() => {
         if (!summary || !timeline) return;
 
@@ -181,6 +182,7 @@ export const DegreePlanner = ({ summary }) => {
         setCourses(formattedCourses);
     }, [summary, timeline]);
 
+    // Update requirements
     useEffect(() => {
         if (!courses.length) return;
 

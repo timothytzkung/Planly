@@ -82,6 +82,7 @@ export const TranscriptCard = ({ summary }) => {
         };
     }, [summary]);
 
+    // Filter courses
     const filteredCourses = useMemo(() => {
         if (activeSemester === 'All') {
             return statistics.semesters.flatMap((semester) =>

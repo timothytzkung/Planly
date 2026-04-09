@@ -31,6 +31,7 @@ export const AdminReview = () => {
   const updateReview = (id, patch) =>
     setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
 
+    // Include verifyAdmin in backend, token check, then role check
     const deleteReview = async (id) => {
       try {
         const res = await fetch(`http://localhost:${backport}/api/sfuCourses/reviews/${id}`, {
@@ -72,6 +73,7 @@ export const AdminReview = () => {
     }
   }
 
+  // Matching filter
   const filtered = reviews.filter((r) => {
     const q = search.toLowerCase();
     const matchSearch =
@@ -91,6 +93,7 @@ export const AdminReview = () => {
     return matchSearch && matchStatus && matchRating && matchFlagged;
   });
 
+  // Fetch reviews on mount 
   useEffect(() => {
     const handleFetchReviews = async () => {
       const res = await fetchReviews();
@@ -99,6 +102,7 @@ export const AdminReview = () => {
     handleFetchReviews();
   }, [])
 
+  // Hard styles
   const styles = {
     page: {
       fontFamily: "'DM Sans', 'Helvetica Neue', sans-serif",
