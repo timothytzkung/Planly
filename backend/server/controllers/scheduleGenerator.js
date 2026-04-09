@@ -24,7 +24,8 @@ export const GenerateSchedule = (rawData) => {
       const courseSchedule = courseObj.courseSchedule;
   
       if (!info || !Array.isArray(courseSchedule)) return;
-  
+
+      // Get name from outline; IAT favouritism
       const courseName = courseObj.courseCode || info.name?.split(" ").slice(0, 2).join(" ");
       const category = info.dept === "IAT" ? "SIAT" : info.dept || courseObj.departmentCode;
 
@@ -39,9 +40,11 @@ export const GenerateSchedule = (rawData) => {
       // If no start time, return nothing (online courses or TBA)
       courseSchedule.forEach((session) => {
         if (!session.days || !session.startTime) return;
-  
+
+        // Split string to array, then trim
         const scheduledDays = session.days.split(",").map((d) => d.trim());
-  
+
+        // Mapping days
         scheduledDays.forEach((dayAbbr) => {
           const fullDay = dayMap[dayAbbr];
           if (!fullDay) return;

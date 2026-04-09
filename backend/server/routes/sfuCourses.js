@@ -320,7 +320,7 @@ router.delete("/reviews/:id", verifyToken, verifyAdmin, async (req, res) => {
 router.post("/get-favourites", async(req, res) => {
   if (!req.body) return res.status(400).json({ error: "No body attached" });
   try {
-
+    // Magical mongodb moment with populate for relational database pointer
     const user = await User.findById(req.body.userId).populate("favourites");
 
     if (!user) {
@@ -340,10 +340,12 @@ router.post("/get-favourites", async(req, res) => {
 router.post("/add-favourite", verifyToken, async (req, res) => {
   const { userId, courseId } = req.body;
 
+  // If missing fields, return
   if (!userId || !courseId) {
     return res.status(400).json({ error: "Missing userId or courseId" });
   }
 
+  // Attempt to add favourites to user
   try {
     const user = await User.findById(userId);
 
@@ -368,6 +370,7 @@ router.post("/add-favourite", verifyToken, async (req, res) => {
   }
 });
 
+// Remove favourites from user
 router.post("/remove-favourite", verifyToken, async (req, res) => {
   const { userId, courseId } = req.body;
 
