@@ -49,7 +49,7 @@
         <div className={styles.container}>
             <Sidebar />
             <DegreePlanner summary={summary}/>
-            <Schedule />
+            {/* <Schedule /> */}
         </div>
         
     )

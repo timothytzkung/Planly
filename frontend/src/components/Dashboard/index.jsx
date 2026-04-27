@@ -1,11 +1,11 @@
 
 import styles from "./Dashboard.module.css"
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useMemo } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { UserContext } from "../../context/UserContext";
 
 // Dashboard view, props will contain data?
-export const Dashboard = ({ uploadTranscript, setFile, file, setTranscript, transcript, summary, _error}) => {
+export const Dashboard = ({ uploadTranscript, setFile, file, setTranscript, transcript, summary, _error }) => {
     // current courses stash
     const [currentTerm, setCurrentTerm] = useState("");
     // const [currentCourses, setCurrentCourses] = useState(null);
@@ -13,61 +13,44 @@ export const Dashboard = ({ uploadTranscript, setFile, file, setTranscript, tran
     const [upperDivision, setUpperDivision] = useState(0);
     const [totalBreadth, setTotalBreadth] = useState(0);
     const [gpa, setGpa] = useState(0);
-    const [gaps, setGaps] = useState([]);
-    
+    // const [gaps, setGaps] = useState([]);
+
     // Destruct summary if exists
-    const { 
+    const {
         creditsCompleted, creditsInProgress, percentComplete, studentStatus
     } = summary?.summary || 0;
 
     // Array of courses
     const { timeline } = summary?.timeline || 0;
 
-      // Destructure to use contexts
+    // Destructure to use contexts
     const { currentCourses, setCurrentCourses } = useContext(AuthContext);
-
-
-    // const gaps = [
-    //     { label: "Lower Division", done: 12, req: 30, fillClass: "green" },
-    //     { label: "Upper Division", done: 3, req: 60, fillClass: "blue" },
-    //     { label: "Breadth", done: 12, req: 18, fillClass: "yellow" },
-    // ];
 
     // Helper func 
     const clamp = (val, min, max) => Math.min(Math.max(val, min), max)
 
-    const fetchGaps = () => {
-        // Currently fetching for sci
-        const { 
-            lowerDivisionElectives, lowerDivisionRequired, upperDivisionRequired,
-            upperDivisionScience, wqb
-        } = summary?.requirements || {}
+    const getRequirementByGroup = (requirements, group) => {
+        return Object.values(requirements).filter(req => {
+            if (req.group === group) return true;
 
-        const {breadth, quantitative, writing} = wqb;
-        const {additional, humanities, science, socialScience} = breadth;
+            if (group === "lowerDivision") {
+                return req.id?.includes("lower-division");
+            }
 
-        let _breadth = additional?.completed + humanities?.completed + science?.completed + socialScience?.completed;
-        let _quant = quantitative?.completed;
-        let _writing = writing?.completed;
+            if (group === "upperDivision") {
+                return req.id?.includes("upper-division") || req.id?.includes("four-hundred");
+            }
 
-        // Breadth
-        setTotalBreadth(_breadth + _quant + _writing);
-
-        // Core courses
-        const totalLowerCompleted = lowerDivisionElectives?.creditsCompleted + lowerDivisionRequired?.creditsCompleted;
-        const totalUpperCompleted = upperDivisionRequired?.creditsCompleted + upperDivisionScience?.creditsCompleted;
-
-        setLowerDivision(totalLowerCompleted);
-        setUpperDivision(totalUpperCompleted);
-
-    }
+            return false;
+        });
+    };
 
     // Terms
     const fetchLatestTerm = () => {
         const _terms = summary?.timeline || {}
 
         // Null check
-        if (!_terms) return {"2025 Fall": {}}; // dummy fallback
+        if (!_terms) return { "2025 Fall": {} }; // dummy fallback
 
         // Returns last key in courses (will always be sorted)
         return Object.keys(_terms)[Object.keys(_terms).length - 1];
@@ -76,7 +59,7 @@ export const Dashboard = ({ uploadTranscript, setFile, file, setTranscript, tran
     const fetchLatestCourses = () => {
         // Get courses from latest term
         const _courses = summary?.timeline[currentTerm] || {};
-        
+
         // Null check
         if (!_courses) return {}
 
@@ -85,35 +68,81 @@ export const Dashboard = ({ uploadTranscript, setFile, file, setTranscript, tran
 
     const fetchGPA = () => {
         const _gpa = summary?.gpa.overall.gpa;
-        if(!_gpa) return 0;
+        if (!_gpa) return 0;
 
         return _gpa;
     }
 
-    useEffect(() => {
-        // Get current term
-        if (summary) {
-            let res = fetchLatestTerm();
-            setCurrentTerm(res);
+    const getCreditsDone = (req) => {
+        return req?.creditsCompleted ?? req?.completed ?? 0;
+    };
 
-            // Fetch gaps
-            fetchGaps()
-            setGaps(
-                [
-                { label: "Lower Division", done: lowerDivision || 0, req: 30, fillClass: "green" },
-                { label: "Upper Division", done: upperDivision || 0, req: 44, fillClass: "blue" },
-                { label: "Breadth", done: totalBreadth, req: 18, fillClass: "yellow" },
-                ]
-            )
-            let _gpa = fetchGPA();
-            setGpa(_gpa);
-        }
-        if (currentTerm && summary) {
-            let res = fetchLatestCourses();
-            setCurrentCourses(res);
-        }
-        
-    }, [summary, currentTerm])
+    const getCreditsRequired = (req) => {
+        return req?.creditsRequired ?? req?.creditsTotal ?? req?.required ?? 0;
+    };
+
+    const sumRequirementCredits = (reqs) => {
+        return reqs.reduce((sum, req) => sum + getCreditsDone(req), 0);
+    };
+
+    const sumRequiredCredits = (reqs) => {
+        return reqs.reduce((sum, req) => sum + getCreditsRequired(req), 0);
+    };
+
+    const buildGaps = (summary) => {
+        const requirements = summary?.requirements ?? {};
+
+        const lowerDivisionReqs = getRequirementByGroup(requirements, "lowerDivision");
+        const upperDivisionReqs = getRequirementByGroup(requirements, "upperDivision");
+
+        const wqbChildren = requirements["wqb"]?.children ?? [];
+
+        return [
+            {
+                label: "Lower Division",
+                done: sumRequirementCredits(lowerDivisionReqs),
+                req: sumRequiredCredits(lowerDivisionReqs),
+                fillClass: "green"
+            },
+            {
+                label: "Upper Division",
+                done: sumRequirementCredits(upperDivisionReqs),
+                req: sumRequiredCredits(upperDivisionReqs),
+                fillClass: "blue"
+            },
+            {
+                label: "WQB",
+                done: sumRequirementCredits(wqbChildren),
+                req: sumRequiredCredits(wqbChildren),
+                fillClass: "yellow"
+            }
+        ];
+    };
+
+    // Gap fetching from summary
+    const gaps = useMemo(() => {
+        if (!summary) return [];
+        return buildGaps(summary);
+    }, [summary]);
+
+
+
+
+
+    useEffect(() => {
+        if (!summary) return;
+
+        setCurrentTerm(fetchLatestTerm());
+        setGpa(fetchGPA());
+    }, [summary]);
+
+    useEffect(() => {
+        if (!currentTerm || !summary) return;
+
+        setCurrentCourses(fetchLatestCourses());
+    }, [currentTerm, summary]);
+
+    console.log(summary)
 
 
     return (
@@ -124,38 +153,38 @@ export const Dashboard = ({ uploadTranscript, setFile, file, setTranscript, tran
                 <div className={styles.headerProgress}>
                     <span>{creditsCompleted || 0} of 120 credits completed</span>
                     <div className={styles.miniBar}>
-                        <div 
-                        className={styles.miniBarFill} 
-                        style={{
-                            width: `${clamp(creditsCompleted/120 * 100, 0, 100)}%`
-                        }}
+                        <div
+                            className={styles.miniBarFill}
+                            style={{
+                                width: `${clamp(creditsCompleted / 120 * 100, 0, 100)}%`
+                            }}
                         />
                     </div>
                 </div>
             </div>
 
-            <p className={styles.subtitle}>{currentTerm || "2025 Fall"} | SIAT Major | BSc</p>
+            <p className={styles.subtitle}>{currentTerm || "2025 Fall"} | {summary?.degree.name}</p>
             {file &&
                 <div className={styles.fileTextContainer}>File Uploaded: {file.name}</div>
             }
             {_error &&
-            <div>{_error}</div>
+                <div>{_error}</div>
             }
             <div className={styles.btnRow}>
-                
-                <form onSubmit={uploadTranscript}>
+
+                <form onSubmit={uploadTranscript} className={styles.inBtnRow}>
                     <label htmlFor="fileUpload" className={styles.btnOutline}>
                         Upload Transcript
                     </label>
                     <input
-                    style={{display: "none"}}
+                        style={{ display: "none" }}
                         type="file"
                         id="fileUpload"
                         accept="application/pdf"
                         onChange={(e) => setFile(e.target.files?.[0] ?? null)}
                     />
                     <button
-                    className={styles.btnPrimary}>Submit & Analyze</button>
+                        className={styles.btnPrimary}>Submit & Analyze</button>
                 </form>
                 <button className={styles.btnPrimary}>Plan Semester →</button>
             </div>
@@ -167,14 +196,14 @@ export const Dashboard = ({ uploadTranscript, setFile, file, setTranscript, tran
                     <a className={styles.viewLink}>View Degree →</a>
                 </div>
                 <div className={styles.degreeProgressBar}>
-                    <div className={styles.degreeProgressFill} 
-                    style={{
-                            width: `${clamp(creditsCompleted/120 * 100, 0, 100)}%`
-                        }}/>
+                    <div className={styles.degreeProgressFill}
+                        style={{
+                            width: `${clamp(creditsCompleted / 120 * 100, 0, 100)}%`
+                        }} />
                 </div>
                 <div className={styles.degreeStats}>
                     <span>{creditsCompleted ?? 0}  credits completed</span>
-                    <span>{120 - (creditsCompleted?? 0) } credits remaining</span>
+                    <span>{120 - (creditsCompleted ?? 0)} credits remaining</span>
                 </div>
             </div>
 
@@ -196,14 +225,14 @@ export const Dashboard = ({ uploadTranscript, setFile, file, setTranscript, tran
                     <div className={styles.statLabel}>Current Semester</div>
                     <div className={styles.termContainer}>
                         <div className={`${styles.statValue} ${styles.statSemester}`}>
-                        { currentTerm ?
-                        (currentTerm.split(" ")[1] || "N/D") : "N/D"
-                        }
+                            {currentTerm ?
+                                (currentTerm.split(" ")[1] || "N/D") : "N/D"
+                            }
                         </div>
                         <span className={styles.statSemesterYear}>
-                            { currentTerm ?
-                        (currentTerm.split(" ")[0] || "") : ""
-                        }</span>
+                            {currentTerm ?
+                                (currentTerm.split(" ")[0] || "") : ""
+                            }</span>
                     </div>
 
 
@@ -237,29 +266,34 @@ export const Dashboard = ({ uploadTranscript, setFile, file, setTranscript, tran
                 </div>
             </div>
 
-            {/* Requirement Gaps */}
+            {/* Requirement Gaps - NOTE: Does NOT include in-progress courses*/}
             <div className={styles.sectionCard}>
                 <div className={styles.sectionHeader}>
                     <span className={styles.sectionTitle}>Requirement Gaps</span>
                 </div>
-                <div className={styles.gapGrid}>
-                    {/* Renders cards */}
-                    {gaps.map((g) => (
-                        <div key={g.label} className={styles.gapCard}>
-                            <div className={styles.gapLabel}>{g.label}</div>
 
-                            <div className={styles.gapBar}>
-                                <div
-                                    className={`${styles.gapFill} ${styles[g.fillClass]}`}
-                                    style={{ width: `${(g.done / g.req) * 100}%` }}
-                                />
+                <div className={styles.gapGrid}>
+                    {gaps.map((g) => {
+                        const percent = g.req > 0 ? Math.min(100, (g.done / g.req) * 100) : 0;
+
+                        return (
+                            <div key={g.label} className={styles.gapCard}>
+                                <div className={styles.gapLabel}>{g.label}</div>
+
+                                <div className={styles.gapBar}>
+                                    <div
+                                        className={`${styles.gapFill} ${styles[g.fillClass]}`}
+                                        style={{ width: `${percent}%` }}
+                                    />
+                                </div>
+
+                                <div className={styles.gapStats}>
+                                    <span>{g.done} done</span>
+                                    <span>{g.req} req.</span>
+                                </div>
                             </div>
-                            <div className={styles.gapStats}>
-                                <span>{g.done} done</span>
-                                <span>{g.req} req.</span>
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
         </div>

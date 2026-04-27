@@ -63,8 +63,13 @@ form {
 
 .btnRow {
     display: flex;
-    gap: 12px;
+    gap: 24px;
     margin-bottom: 24px;
+}
+
+.inBtnRow {
+    display: flex;
+    gap: 12px;
 }
 
 /* Degree Completion Card */

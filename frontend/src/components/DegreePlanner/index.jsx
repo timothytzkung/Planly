@@ -75,11 +75,49 @@ const Chip = ({ code, status }) => {
 const SectionCard = ({
     title,
     percent,
-    creditsDone,
-    creditsTotal,
-    courses,
+    progressDone,
+    progressTotal,
+    progressUnit,
     accentColor,
+    courses = [],
+    courseOptions = [],
+    childrenRequirements = [],
 }) => {
+    const completedCodes = new Set(
+        courses
+            .filter(c => c.status === "completed" || c.completed)
+            .map(c => c.code ?? c.course)
+    );
+
+    const inProgressCodes = new Set(
+        courses
+            .filter(c => c.status === "in-progress" || c.inProgress)
+            .map(c => c.code ?? c.course)
+    );
+
+    const STATUS_ORDER = { completed: 0, "in-progress": 1, remaining: 2 };
+
+    const chipCourses = (
+        courseOptions.length > 0
+            ? courseOptions.map(code => ({
+                  code,
+                  status: completedCodes.has(code)
+                      ? "completed"
+                      : inProgressCodes.has(code)
+                      ? "in-progress"
+                      : "remaining",
+              }))
+            : courses.map(c => ({
+                  code: c.code ?? c.course,
+                  status:
+                      c.status === "completed" || c.completed
+                          ? "completed"
+                          : c.status === "in-progress" || c.inProgress
+                          ? "in-progress"
+                          : "remaining",
+              }))
+    ).sort((a, b) => (STATUS_ORDER[a.status] ?? 2) - (STATUS_ORDER[b.status] ?? 2));
+
     return (
         <div className={styles.card}>
             <div className={styles.sectionCardTop}>
@@ -91,12 +129,31 @@ const SectionCard = ({
                     {percent}%
                 </span>
             </div>
+
             <div className={styles.sectionCardSub}>
-                {creditsDone}/{creditsTotal} credits
+                {progressDone}/{progressTotal} {progressUnit}
             </div>
-            {courses.length > 0 && (
+
+            {childrenRequirements.length > 0 && (
+                <div className={styles.childRequirements}>
+                    {childrenRequirements.map((child) => {
+                        const childProgress = getRequirementProgress(child);
+                        return (
+                            <div key={child.id} className={styles.childRequirementRow}>
+                                <span style={{ fontWeight: "700" }}>{child.name}: </span>
+                                <span>
+                                    {childProgress.done}/{childProgress.total}{" "}
+                                    {childProgress.unit}
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {chipCourses.length > 0 && (
                 <div className={styles.chips}>
-                    {courses.map(({ code, status }) => (
+                    {chipCourses.map(({ code, status }) => (
                         <Chip key={code} code={code} status={status} />
                     ))}
                 </div>
@@ -105,90 +162,86 @@ const SectionCard = ({
     );
 };
 
+const getRequirementProgress = (req) => {
+    if (!req) {
+        return { percent: 0, done: 0, total: 0, unit: "requirements" };
+    }
+
+    if (req.progressUnit === "credits") {
+        const done = (req.creditsCompleted ?? 0) + (req.creditsInProgress ?? 0);
+        const total = req.creditsRequired ?? 0;
+
+        return {
+            percent: total > 0 ? Math.round((done / total) * 100) : 0,
+            done,
+            total,
+            unit: "credits"
+        };
+    }
+
+    if (req.progressUnit === "courses") {
+        const done = (req.completed ?? 0) + (req.inProgress ?? 0);
+        const total = req.required ?? 0;
+
+        return {
+            percent: total > 0 ? Math.round((done / total) * 100) : 0,
+            done,
+            total,
+            unit: "courses"
+        };
+    }
+
+    return {
+        percent: req.isMet ? 100 : 0,
+        done: req.isMet ? 1 : 0,
+        total: 1,
+        unit: "requirement"
+    };
+};
+
+
+const getRequirementCoursesOptions = (req) => {
+    if (!req) return [];
+
+    if (req.options?.length) {
+        return req.options;
+    }
+}
+
+const getRequirementCourses = (req) => {
+    if (!req) return [];
+
+    if (req.courses?.length) {
+        return req.courses.map(course => ({
+            code: course.code ?? course.course ?? course.courseCode,
+            name: course.name ?? course.courseName,
+            credits: course.credits,
+            grade: course.grade,
+            status: course.status ?? "remaining"
+        }));
+    }
+
+    if (req.status?.length) {
+        return req.status.map(course => ({
+            code: course.course,
+            status: course.completed
+                ? "completed"
+                : course.inProgress
+                    ? "in-progress"
+                    : "remaining",
+            grade: course.grade
+        }));
+    }
+
+    return [];
+};
+
 // Main degree planner view
 export const DegreePlanner = ({ summary }) => {
-
-    const [courses, setCourses] = useState([]);
-
-    // Temporary fallback courses in case fetch failure
-    const [LOWER_DIVISION, SET_LOWER_DIVISION] = useState([
-        { code: "IAT 100", status: "completed" },
-        { code: "IAT 102", status: "completed" },
-        { code: "IAT 103W", status: "completed" },
-        { code: "IAT 106", status: "completed" },
-        { code: "CMPT 120", status: "completed" },
-        { code: "IAT 167", status: "completed" },
-        { code: "MATH 130", status: "completed" },
-        { code: "MACM 101", status: "completed" },
-        { code: "IAT 206W", status: "in-progress" },
-        { code: "IAT 201", status: "remaining" },
-        { code: "IAT 202", status: "remaining" },
-        { code: "IAT 222", status: "remaining" },
-        { code: "IAT 233", status: "remaining" },
-        { code: "IAT 235", status: "remaining" },
-        { code: "IAT 238", status: "remaining" },
-        { code: "IAT 265", status: "remaining" },
-    ]);
-
-    const [UPPER_DIVISION, SET_UPPER_DIVISION] = useState([
-        { code: "IAT 333", status: "remaining" },
-        { code: "IAT 336", status: "remaining" },
-        { code: "IAT 339", status: "remaining" },
-        { code: "IAT 351", status: "remaining" },
-        { code: "IAT 355", status: "remaining" },
-        { code: "IAT 359", status: "remaining" },
-        { code: "IAT 360", status: "remaining" },
-        { code: "IAT 381", status: "remaining" },
-        { code: "IAT 387", status: "remaining" },
-        { code: "IAT 410", status: "remaining" },
-        { code: "IAT 432", status: "remaining" },
-        { code: "IAT 452", status: "remaining" },
-        { code: "IAT 459", status: "remaining" },
-        { code: "IAT 460", status: "remaining" },
-        { code: "IAT 461", status: "remaining" },
-        { code: "IAT 481", status: "remaining" },
-        { code: "IAT 487", status: "remaining" },
-        { code: "IAT 499", status: "remaining" }
-    ]);
-
-    const timeline = summary?.timeline;
-    const requirements = summary?.requirements;
-
-    const formatCourses = (_timeline) => {
-        // null check
-        if (!_timeline) return [];
-
-        return Object.values(_timeline).flatMap(term => term.courses || []);
-    };
-
-    const updateRequirements = (division, completedCourses) => {
-        // look up for courses
-        return division.map((reqCourse) => {
-            const matchedCourse = completedCourses.find(
-                (course) => course.code === reqCourse.code
-            );
-
-            return matchedCourse
-                ? { ...reqCourse, status: matchedCourse.status }
-                : reqCourse;
-        });
-    };
-
-    // Format courses via timeline from summary
-    useEffect(() => {
-        if (!summary || !timeline) return;
-
-        const formattedCourses = formatCourses(timeline);
-        setCourses(formattedCourses);
-    }, [summary, timeline]);
-
-    // Update requirements
-    useEffect(() => {
-        if (!courses.length) return;
-
-        SET_LOWER_DIVISION((prev) => updateRequirements(prev, courses));
-        SET_UPPER_DIVISION((prev) => updateRequirements(prev, courses));
-    }, [courses]);
+    console.log(summary)
+    const requirements = summary?.requirements ?? {};
+    const degreeSummary = summary?.summary ?? {};
+    const degreeTotalCredits = summary?.degree?.totalCredits ?? 120;
 
     const COLORS = {
         completed: "#E24B4A",
@@ -200,82 +253,75 @@ export const DegreePlanner = ({ summary }) => {
         bachelor: "#1D9E75",
     };
 
-    // // Debug for schema visibility
-    // console.log(summary)
+    // Constructs the sections for cards
+    const buildSectionConfigs = (requirements, COLORS) => {
+        return Object.values(requirements)
+            .filter(req => req.showInPlanner !== false)
+            .sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999))
+            .map(req => ({
+                title: req.name,
+                requirementId: req.id,
+                accentColor: COLORS[req.accent] ?? COLORS.upperDiv
+            }));
+    };
+
+    const sectionConfigs = buildSectionConfigs(requirements, COLORS);
 
     return (
-        <>
-            <div className={styles.container}>
-                {/* Header */}
-                <header className={styles.degreeHeader}>
-                    <div className={styles.degreeHeaderLeft}>
-                        <h1>Degree</h1>
-                        <p>SIAT Major | BSc | 120 credits total</p>
-                    </div>
-                    <div className={styles.degreeHeaderRight}>
-                        <div className={styles.degreeHeaderPercent}>{summary?.summary.percentComplete}%</div>
-                        <p className={styles.degreeHeaderLabel}>Degree Completed</p>
-                    </div>
-                </header>
-
-                {/* Overall */}
-                <OverallProgressCard
-                creditsDone={summary?.summary.creditsCompleted}
-                    completed={summary?.summary.creditsCompleted}
-                    inProgress={summary?.summary.creditsInProgress}
-                    remaining={summary?.summary.creditsRemaining}
-                    total={120}
-                    COLORS={COLORS}
-                />
-
-                {/* Sections grid 
-                it's so ugly oml => refactor into a state later maybe?
-                */}
-                <div className={styles.sectionGrid}>
-                    <SectionCard
-                        title="Lower Division"
-                        percent={Math.round((requirements?.lowerDivisionRequired?.creditsCompleted + requirements?.lowerDivisionElectives?.creditsCompleted)/39 * 100)}
-                        creditsDone={requirements?.lowerDivisionRequired?.creditsCompleted + requirements?.lowerDivisionElectives?.creditsCompleted }
-                        creditsTotal={39}
-                        courses={LOWER_DIVISION}
-                        accentColor={COLORS.lowerDiv}
-                    />
-                    <SectionCard
-                        title="Upper Division (Science)"
-                        percent={Math.round((requirements?.upperDivisionScience?.creditsCompleted + requirements?.upperDivisionScience?.creditsInProgress)/24 * 100)}
-                        creditsDone={requirements?.upperDivisionScience?.creditsCompleted + requirements?.upperDivisionScience?.creditsInProgress}
-                        creditsTotal={24}
-                        courses={UPPER_DIVISION}
-                        accentColor={COLORS.upperDiv}
-                    />
-                    <SectionCard
-                        title="Breadth Req."
-                        percent={
-                            Math.floor((requirements?.wqb.breadth.additional.completed +
-                            requirements?.wqb.breadth.humanities.completed +
-                            requirements?.wqb.breadth.science.completed +
-                            requirements?.wqb.breadth.socialScience.completed) /36 * 100)
-                        }
-                        creditsDone={
-                            requirements?.wqb.breadth.additional.completed +
-                            requirements?.wqb.breadth.humanities.completed +
-                            requirements?.wqb.breadth.science.completed +
-                            requirements?.wqb.breadth.socialScience.completed
-                        }
-                        creditsTotal={36}
-                        courses={[]}
-                        accentColor={COLORS.breadth}
-                    />
-                    <SectionCard
-                        title="Bachelor Req."
-                        percent={Math.round(summary?.summary.creditsCompleted / 120 * 100)}
-                        creditsDone={summary?.summary.creditsCompleted}
-                        creditsTotal={120}
-                        courses={[]}
-                        accentColor={COLORS.bachelor}
-                    />
+        <div className={styles.container}>
+            <header className={styles.degreeHeader}>
+                <div className={styles.degreeHeaderLeft}>
+                    <h1>Degree</h1>
+                    <p>{summary?.degree?.name ?? "Degree Planner"}</p>
                 </div>
+
+                <div className={styles.degreeHeaderRight}>
+                    <div className={styles.degreeHeaderPercent}>
+                        {degreeSummary.percentComplete ?? 0}%
+                    </div>
+                    <p className={styles.degreeHeaderLabel}>Degree Completed</p>
+                </div>
+            </header>
+
+            <OverallProgressCard
+                creditsDone={degreeSummary.creditsCompleted ?? 0}
+                completed={degreeSummary.creditsCompleted ?? 0}
+                inProgress={degreeSummary.creditsInProgress ?? 0}
+                remaining={degreeSummary.creditsRemaining ?? 0}
+                total={degreeTotalCredits}
+                COLORS={COLORS}
+            />
+
+            <div className={styles.sectionGrid}>
+                {sectionConfigs.map(config => {
+                    const req = requirements[config.requirementId];
+                    const progress = getRequirementProgress(req);
+
+                    return (
+                        <SectionCard
+                        key={config.requirementId}
+                        title={config.title}
+                        percent={progress.percent}
+                        progressDone={progress.done}
+                        progressTotal={progress.total}
+                        progressUnit={progress.unit}
+                        courses={getRequirementCourses(req)}
+                        courseOptions={req.options ?? []}
+                        childrenRequirements={req.children ?? []}
+                        accentColor={config.accentColor}
+                        />
+                    );
+                    })}
+
+                {/* <SectionCard
+                    title="Bachelor Req."
+                    percent={degreeSummary.percentComplete ?? 0}
+                    creditsDone={degreeSummary.creditsCompleted ?? 0}
+                    creditsTotal={degreeTotalCredits}
+                    courses={[]}
+                    accentColor={COLORS.bachelor}
+                /> */}
             </div>
-        </>
-    )
-}
+        </div>
+    );
+};

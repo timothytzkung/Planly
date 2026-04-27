@@ -22,7 +22,9 @@ const Summary = require("./models/Summary");
 
 // In-house functions
 import { parseTranscriptByTerm } from "./utils/parse.js";
-import { transcriptAnalyzer } from "./controllers/transcriptAnalyzer.js";
+import { analyzeStudentDegree } from "./controllers/DegreeAnalyzer/analyzeStudentDegree.js";
+
+// import { transcriptAnalyzer } from "./controllers/transcriptAnalyzer.js";
 const {verifyToken} = require("./middleware/authMiddleware");
 
 const app = express();
@@ -96,30 +98,23 @@ app.post("/api/parse", upload.single("pdf"), async (req, res) => {
   res.json({ transcript: fin });
 });
 
-// Check requirements stuff (generates summary)
 app.post("/api/check-requirements", async (req, res) => {
-  if (!req.body) return res.status(400).json({ error: "No body attached" });
-
-  // Destruct
   const { transcriptData, degreeType, owner } = req.body;
-  const result = await transcriptAnalyzer(transcriptData, owner);
 
-  // Remove existing summaries if exists
-  try {
-    const exists = await Summary.findOneAndDelete({owner: owner.id})
-    } catch (e) {
-    console.log("No existing summary!")
-  }
+  const result = await analyzeStudentDegree({
+    transcriptData,
+    degreeType,
+    owner
+  });
+
+  await Summary.findOneAndDelete({ owner: owner.id });
 
   const summaryDoc = new Summary(result);
   await summaryDoc.save();
 
-  // Check
-  console.log(summaryDoc);
-  const fin = JSON.stringify(summaryDoc, null, 2);
+  res.json({ result: summaryDoc });
+});
 
-  res.json({ result: fin });
-})
 
 // Fetch summary
 app.post("/api/summary/", async(req, res) => {
