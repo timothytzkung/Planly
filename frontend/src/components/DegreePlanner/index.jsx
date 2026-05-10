@@ -100,22 +100,22 @@ const SectionCard = ({
     const chipCourses = (
         courseOptions.length > 0
             ? courseOptions.map(code => ({
-                  code,
-                  status: completedCodes.has(code)
-                      ? "completed"
-                      : inProgressCodes.has(code)
-                      ? "in-progress"
-                      : "remaining",
-              }))
+                code,
+                status: completedCodes.has(code)
+                    ? "completed"
+                    : inProgressCodes.has(code)
+                        ? "in-progress"
+                        : "remaining",
+            }))
             : courses.map(c => ({
-                  code: c.code ?? c.course,
-                  status:
-                      c.status === "completed" || c.completed
-                          ? "completed"
-                          : c.status === "in-progress" || c.inProgress
-                          ? "in-progress"
-                          : "remaining",
-              }))
+                code: c.code ?? c.course,
+                status:
+                    c.status === "completed" || c.completed
+                        ? "completed"
+                        : c.status === "in-progress" || c.inProgress
+                            ? "in-progress"
+                            : "remaining",
+            }))
     ).sort((a, b) => (STATUS_ORDER[a.status] ?? 2) - (STATUS_ORDER[b.status] ?? 2));
 
     return (
@@ -140,11 +140,34 @@ const SectionCard = ({
                         const childProgress = getRequirementProgress(child);
                         return (
                             <div key={child.id} className={styles.childRequirementRow}>
-                                <span style={{ fontWeight: "700" }}>{child.name}: </span>
-                                <span>
-                                    {childProgress.done}/{childProgress.total}{" "}
-                                    {childProgress.unit}
-                                </span>
+                                <div className={styles.childHeader}>
+                                    <span className={styles.childName}>{child.name}</span>
+
+                                    <span className={styles.childValue}>
+                                        {childProgress.done}/{childProgress.total} {childProgress.unit}
+                                    </span>
+
+                                </div>
+                                {
+                                        child?.courses.length > 0 && (
+                                            <div className={styles.chips}>
+                                                {
+                                                    child?.courses.map(({ code }) => (
+                                                        <Chip key={code} code={code} status={"completed"} />
+                                                    ))
+                                                }
+                                            </div>
+                                        )
+                                    }
+
+                                <div className={styles.progressBar}>
+                                    <div
+                                        className={styles.progressFill}
+                                        style={{
+                                            width: `${(childProgress.done / childProgress.total) * 100}%`
+                                        }}
+                                    />
+                                </div>
                             </div>
                         );
                     })}
@@ -158,6 +181,7 @@ const SectionCard = ({
                     ))}
                 </div>
             )}
+
         </div>
     );
 };
@@ -299,19 +323,19 @@ export const DegreePlanner = ({ summary }) => {
 
                     return (
                         <SectionCard
-                        key={config.requirementId}
-                        title={config.title}
-                        percent={progress.percent}
-                        progressDone={progress.done}
-                        progressTotal={progress.total}
-                        progressUnit={progress.unit}
-                        courses={getRequirementCourses(req)}
-                        courseOptions={req.options ?? []}
-                        childrenRequirements={req.children ?? []}
-                        accentColor={config.accentColor}
+                            key={config.requirementId}
+                            title={config.title}
+                            percent={progress.percent}
+                            progressDone={progress.done}
+                            progressTotal={progress.total}
+                            progressUnit={progress.unit}
+                            courses={getRequirementCourses(req)}
+                            courseOptions={req.options ?? []}
+                            childrenRequirements={req.children ?? []}
+                            accentColor={config.accentColor}
                         />
                     );
-                    })}
+                })}
 
                 {/* <SectionCard
                     title="Bachelor Req."
