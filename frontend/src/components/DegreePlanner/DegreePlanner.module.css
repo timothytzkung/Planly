@@ -210,6 +210,42 @@ body {
     border: 1px solid #dedad2;
 }
 
+.childRequirementRow {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  
+  .childHeader {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+  }
+  
+  .childName {
+    font-weight: 700;
+  }
+  
+  .childValue {
+    opacity: 0.8;
+  }
+  
+  .progressBar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  
+  .progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #1D9E75, #4FD1A5);
+    border-radius: 999px;
+    transition: width 0.3s ease;
+  }
+
 @media (max-width: 520px) {
     .sectionGrid {
         grid-template-columns: 1fr;

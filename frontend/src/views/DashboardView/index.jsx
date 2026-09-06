@@ -171,25 +171,36 @@ export const DashboardView = () => {
     
 
     const checkRequirements = async (_degreeType) => {
-        console.log("calling backend for checkreqs")
-        console.log(transcript);
-        const response = await fetch(`http://localhost:${BACK_PORT}/api/check-requirements`, {
+        try {
+          console.log("calling backend for checkreqs");
+          console.log(transcript);
+      
+          const response = await fetch(`http://localhost:${BACK_PORT}/api/check-requirements`, {
             method: "POST",
             headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
+              "Accept": "application/json",
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                transcriptData: transcript,
-                degreeType: _degreeType,
-                owner: user
-            })
-        }).catch((error) => setErr(error));
-
-        const data = await response.json();
-        const parsed = JSON.parse(data.result)
-        return parsed;
-    }
+              transcriptData: transcript,
+              degreeType: _degreeType,
+              owner: user,
+            }),
+          });
+      
+          if (!response.ok) {
+            throw new Error(`Request failed: ${response.status}`);
+          }
+      
+          const data = await response.json();
+      
+          // data.result is likely already parsed
+          return data.result;
+        } catch (error) {
+          setErr(error);
+          return null;
+        }
+      };
 
     // Trigger on finished pdf upload
     useEffect(() => {
@@ -207,7 +218,7 @@ export const DashboardView = () => {
         }
 
         const handleRequirements = async () => {
-            const result = await checkRequirements("BSc");
+            const result = await checkRequirements("iat-bsc");
             setReqSummary(result);
         }
         if (fileIsUploaded) {
