@@ -1,0 +1,42 @@
+version: "3"
+
+dotenv: [".env"]
+
+tasks:
+
+  set-up:
+    desc: "Installs root, frontend, and backend node dependencies"
+    cmds:
+      - npm install && npm audit fix
+      - task: front-install
+      - task: back-install
+
+  front-install:
+    desc: "Installs frontend node dependencies"
+    dir: frontend
+    cmds:
+      - npm install && npm audit fix
+
+  back-install:
+    desc: "Installs backend node dependencies"
+    dir: backend
+    cmds:
+      - npm install && npm audit fix
+
+  client-up:
+    desc: "Runs the frontend dev server"
+    dir: frontend
+    cmds:
+      - npm run dev
+
+  server-up:
+    desc: "Runs the backend server"
+    dir: backend/server
+    cmds:
+      - node server.js
+
+  up:
+    desc: "Runs the frontend and backend concurrently"
+    deps:
+      - client-up
+      - server-up
