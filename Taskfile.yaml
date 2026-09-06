@@ -23,6 +23,21 @@ tasks:
     cmds:
       - npm install && npm audit fix
 
+  db-up:
+    desc: "Starts the Dockerized MongoDB (+ mongo-express) in the background"
+    cmds:
+      - docker compose up -d mongodb mongo-express
+
+  db-down:
+    desc: "Stops the Dockerized MongoDB stack (keeps the data volume)"
+    cmds:
+      - docker compose down
+
+  stack-up:
+    desc: "Builds and runs mongodb + backend together via docker-compose"
+    cmds:
+      - docker compose up -d --build
+
   client-up:
     desc: "Runs the frontend dev server"
     dir: frontend
