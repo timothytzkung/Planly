@@ -31,7 +31,7 @@ const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Mongo Bongo
-const PORT = 5050;
+const PORT = process.env.PORT || 5050;
 const FRONT_PORT = 5173;
 const mongoUri = process.env.MONGO_WQB_URI;
 // const mongo_WQB_URI = process.env.mongo_WQB_URI;
@@ -47,11 +47,13 @@ app.use(
 );
 
 // Mongo DB
-const clientOptions = {
-  serverApi: {
-    version: "1", strict: true, deprecationErrors: true
-  },
-};
+// The Stable API ("serverApi") is an Atlas-oriented feature. Enable it only when
+// talking to an Atlas cluster (mongodb+srv://). A self-hosted / Dockerized server
+// is reached over a plain mongodb:// URI and does not need it.
+const isAtlas = (mongoUri || "").startsWith("mongodb+srv://");
+const clientOptions = isAtlas
+  ? { serverApi: { version: "1", strict: true, deprecationErrors: true } }
+  : {};
 
 // Database connection
 async function connectDB() {
